@@ -133,9 +133,7 @@ uint8_t CPU::LDA_IM()
 
 uint8_t CPU::LDA_ZP()
 {
-    uint16_t address;
-
-    address = GetByteFromPC();
+    uint16_t address = GetByteFromPC();
     A = GetByteFromAddress(address);
     PS.Z = (A == 0 ? 1 : 0);
     PS.N = checkBit(A, 7);
@@ -145,9 +143,7 @@ uint8_t CPU::LDA_ZP()
 
 uint8_t CPU::LDA_ZP_X()
 {
-    uint16_t ZP_address;
-
-    ZP_address = GetByteFromPC();
+    uint16_t ZP_address = GetByteFromPC();
 
     ZP_address += X;
     ZP_address &= 0xFF;// This address require a truncation to 8 bits (zero page address)
@@ -161,9 +157,7 @@ uint8_t CPU::LDA_ZP_X()
 
 uint8_t CPU::LDA_ABS()
 {
-    uint16_t address;
-
-    address = GetWordFromPC();
+    uint16_t address = GetWordFromPC();
 
     A = GetByteFromAddress(address);
     PS.Z = (A == 0 ? 1 : 0);
@@ -174,12 +168,10 @@ uint8_t CPU::LDA_ABS()
 
 uint8_t CPU::LDA_ABS_X()
 {
-    uint16_t base_address;
-    uint16_t final_address;
     bool page_crossed = false;
 
-    base_address = GetWordFromPC();
-    final_address = base_address + X;
+    uint16_t base_address = GetWordFromPC();
+    uint16_t final_address = base_address + X;
 
     if ((final_address ^ base_address) >> 8)
         page_crossed = true;
@@ -189,22 +181,16 @@ uint8_t CPU::LDA_ABS_X()
     PS.N = checkBit(A, 7);
 
 
-    if (page_crossed)
-        return 1;
-    else
-        return 0;
+    return (page_crossed ? 1 : 0);
 }
 
 
 uint8_t CPU::LDA_ABS_Y()
 {
-    uint16_t base_address;
-    uint16_t final_address;
     bool page_crossed = false;
 
-    base_address = GetWordFromPC();
-
-    final_address = base_address + Y;
+    uint16_t base_address = GetWordFromPC();
+    uint16_t final_address = base_address + Y;
 
     if ((final_address ^ base_address) >> 8)
         page_crossed = true;
@@ -213,23 +199,17 @@ uint8_t CPU::LDA_ABS_Y()
     PS.Z = (A == 0 ? 1 : 0);
     PS.N = checkBit(A, 7);
 
-    if (page_crossed)
-        return 1;
-    else
-        return 0;
+    return (page_crossed ? 1 : 0);
 }
 
 uint8_t CPU::LDA_IND_X()
 {
-    uint16_t ZP_address;
-    uint16_t final_address;
-
-    ZP_address = GetByteFromPC();
+    uint16_t ZP_address = GetByteFromPC();
 
     ZP_address += X;
     ZP_address &= 0xFF; // This address require a truncation to 8 bits (zero page address)
 
-    final_address = GetWordFromAddress(ZP_address);
+    uint16_t final_address = GetWordFromAddress(ZP_address);
 
     A = GetByteFromAddress(final_address);
     PS.Z = (A == 0 ? 1 : 0);
@@ -240,16 +220,12 @@ uint8_t CPU::LDA_IND_X()
 
 uint8_t CPU::LDA_IND_Y()
 {
-    uint16_t ZP_address;
-    uint16_t base_address;
-    uint16_t final_address;
     bool page_crossed = false;;
 
-    ZP_address = GetByteFromPC();
+    uint16_t ZP_address = GetByteFromPC();
+    uint16_t base_address = GetWordFromAddress(ZP_address);
 
-    base_address = GetWordFromAddress(ZP_address);
-
-    final_address = base_address + Y;
+    uint16_t final_address = base_address + Y;
     if ((final_address ^ base_address) >> 8)
         page_crossed = true;
 
@@ -257,10 +233,7 @@ uint8_t CPU::LDA_IND_Y()
     PS.Z = (A == 0 ? 1 : 0);
     PS.N = checkBit(A, 7);
 
-    if (page_crossed)
-        return 1;
-    else
-        return 0;
+    return (page_crossed ? 1 : 0);
 }
 
 uint8_t CPU::LDX_IM()
@@ -274,9 +247,7 @@ uint8_t CPU::LDX_IM()
 
 uint8_t CPU::LDX_ZP()
 {
-    uint16_t address;
-
-    address = GetByteFromPC();
+    uint16_t address = GetByteFromPC();
 
     X = GetByteFromAddress(address);
     PS.Z = (X == 0 ? 1 : 0);
@@ -287,9 +258,7 @@ uint8_t CPU::LDX_ZP()
 
 uint8_t CPU::LDX_ZP_Y()
 {
-    uint16_t ZP_address;
-
-    ZP_address = GetByteFromPC();
+    uint16_t ZP_address = GetByteFromPC();
 
     ZP_address += Y;
     ZP_address &= 0xFF;// This address require a truncation to 8 bits (zero page address)
@@ -303,9 +272,7 @@ uint8_t CPU::LDX_ZP_Y()
 
 uint8_t CPU::LDX_ABS()
 {
-    uint16_t address;
-
-    address = GetWordFromPC();
+    uint16_t address = GetWordFromPC();
 
     X = GetByteFromAddress(address);
     PS.Z = (X == 0 ? 1 : 0);
@@ -316,13 +283,10 @@ uint8_t CPU::LDX_ABS()
 
 uint8_t CPU::LDX_ABS_Y()
 {
-    uint16_t base_address;
-    uint16_t final_address;
     bool page_crossed = false;;
 
-    base_address = GetWordFromPC();
-
-    final_address = base_address + Y;
+    uint16_t base_address = GetWordFromPC();
+    uint16_t final_address = base_address + Y;
 
     if ((final_address ^ base_address) >> 8)
         page_crossed = true;
@@ -331,8 +295,5 @@ uint8_t CPU::LDX_ABS_Y()
     PS.Z = (X == 0 ? 1 : 0);
     PS.N = checkBit(X, 7);
 
-    if (page_crossed)
-        return 1;
-    else
-        return 0;
+    return (page_crossed ? 1 : 0);
 }
