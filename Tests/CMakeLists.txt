@@ -28,8 +28,8 @@ enable_testing()
 add_executable(
   UnitTesting
   MemoryTest.cpp
-  LDATest.cpp
-  LDXTest.cpp
+  LoadStoreTest.cpp
+  RegisterTransfersTest.cpp
 )
 target_link_libraries(
   UnitTesting

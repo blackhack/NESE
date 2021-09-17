@@ -20,7 +20,7 @@
 #include "CPU.h"
 #include "Memory.h"
 
-TEST(LDA_Test, LDA_FlagsTest) {
+TEST(LoadStoreTest, LDA_FlagsTest) {
     Memory mem;
     CPU cpu(mem, 1790000);
 
@@ -43,8 +43,7 @@ TEST(LDA_Test, LDA_FlagsTest) {
 
 }
 
-
-TEST(LDA_Test, LDA_IM) {
+TEST(LoadStoreTest, LDA_IM) {
     Memory mem;
     CPU cpu(mem, 1790000);
 
@@ -57,7 +56,7 @@ TEST(LDA_Test, LDA_IM) {
     EXPECT_EQ(cycles, 2);
 }
 
-TEST(LDA_Test, LDA_ZP) {
+TEST(LoadStoreTest, LDA_ZP) {
     Memory mem;
     CPU cpu(mem, 1790000);
 
@@ -70,7 +69,7 @@ TEST(LDA_Test, LDA_ZP) {
     EXPECT_EQ(cycles, 3);
 }
 
-TEST(LDA_Test, LDA_ZP_X) {
+TEST(LoadStoreTest, LDA_ZP_X) {
     Memory mem;
     CPU cpu(mem, 1790000);
 
@@ -93,7 +92,7 @@ TEST(LDA_Test, LDA_ZP_X) {
     EXPECT_EQ(cycles, 4);
 }
 
-TEST(LDA_Test, LDA_ABS) {
+TEST(LoadStoreTest, LDA_ABS) {
     Memory mem;
     CPU cpu(mem, 1790000);
 
@@ -107,7 +106,7 @@ TEST(LDA_Test, LDA_ABS) {
     EXPECT_EQ(cycles, 4);
 }
 
-TEST(LDA_Test, LDA_ABS_X) {
+TEST(LoadStoreTest, LDA_ABS_X) {
     Memory mem;
     CPU cpu(mem, 1790000);
 
@@ -136,7 +135,7 @@ TEST(LDA_Test, LDA_ABS_X) {
     EXPECT_EQ(cycles, 5);
 }
 
-TEST(LDA_Test, LDA_ABS_Y) {
+TEST(LoadStoreTest, LDA_ABS_Y) {
     Memory mem;
     CPU cpu(mem, 1790000);
 
@@ -165,7 +164,7 @@ TEST(LDA_Test, LDA_ABS_Y) {
     EXPECT_EQ(cycles, 5);
 }
 
-TEST(LDA_Test, LDA_IND_X) {
+TEST(LoadStoreTest, LDA_IND_X) {
     Memory mem;
     CPU cpu(mem, 1790000);
 
@@ -181,7 +180,7 @@ TEST(LDA_Test, LDA_IND_X) {
     EXPECT_EQ(cycles, 6);
 }
 
-TEST(LDA_Test, LDA_IND_Y) {
+TEST(LoadStoreTest, LDA_IND_Y) {
     Memory mem;
     CPU cpu(mem, 1790000);
 
@@ -206,4 +205,99 @@ TEST(LDA_Test, LDA_IND_Y) {
     cycles = cpu.Execute(1);
     EXPECT_EQ(cpu.A, 0xDD);
     EXPECT_EQ(cycles, 6);
+}
+
+TEST(LoadStoreTest, LDX_ZP_Y) {
+    Memory mem;
+    CPU cpu(mem, 1790000);
+
+    mem[0] = static_cast<uint8_t>(Opcode::LDX_ZP_Y);
+    mem[1] = 0x80;
+    cpu.Y = 0x0F;
+    mem[0x8F] = 0x84;
+
+    uint32_t cycles = cpu.Execute(1);
+    EXPECT_EQ(cpu.X, 0x84);
+    EXPECT_EQ(cycles, 4);
+
+    mem[2] = static_cast<uint8_t>(Opcode::LDX_ZP_Y);
+    mem[3] = 0x80;
+    cpu.Y = 0xFF;
+    mem[0x7F] = 0x85;
+
+    cycles = cpu.Execute(1);
+    EXPECT_EQ(cpu.X, 0x85);
+    EXPECT_EQ(cycles, 4);
+}
+
+TEST(LoadStoreTest, LDY_ABS_X) {
+    Memory mem;
+    CPU cpu(mem, 1790000);
+
+    mem[0] = static_cast<uint8_t>(Opcode::LDY_ABS_X);
+    mem[1] = 0xCC;
+    mem[2] = 0x1F;
+    cpu.X = 0x01;
+
+    //1FCC + 01 = 1FCD
+    mem[0x1FCD] = 0x55;
+
+    uint32_t cycles = cpu.Execute(1);
+    EXPECT_EQ(cpu.Y, 0x55);
+    EXPECT_EQ(cycles, 4);
+
+    mem[3] = static_cast<uint8_t>(Opcode::LDY_ABS_X);
+    mem[4] = 0xCC;
+    mem[5] = 0x1F;
+    cpu.X = 0x34;
+
+    //1FCC + 34 = 2000
+    mem[0x2000] = 0x44;
+
+    cycles = cpu.Execute(1);
+    EXPECT_EQ(cpu.Y, 0x44);
+    EXPECT_EQ(cycles, 5);
+}
+
+TEST(LoadStoreTest, STA_IND_Y) {
+    Memory mem;
+    CPU cpu(mem, 1790000);
+
+    mem[0] = static_cast<uint8_t>(Opcode::STA_IND_Y);
+    mem[1] = 0x4C;
+    mem[0x4C] = 0x00;
+    mem[0x4D] = 0x21;
+    cpu.Y = 0x05;
+    cpu.A = 0xCD;
+
+    uint32_t cycles = cpu.Execute(1);
+    EXPECT_EQ(cpu.A, mem[0x2105]);
+    EXPECT_EQ(cycles, 6);
+}
+
+TEST(LoadStoreTest, STX_ZP) {
+    Memory mem;
+    CPU cpu(mem, 1790000);
+
+    mem[0] = static_cast<uint8_t>(Opcode::STX_ZP);
+    mem[1] = 0xF3;
+    cpu.X = 0x84;
+
+    uint32_t cycles = cpu.Execute(1);
+    EXPECT_EQ(cpu.X, mem[0xF3]);
+    EXPECT_EQ(cycles, 3);
+}
+
+TEST(LoadStoreTest, STY_ABS) {
+    Memory mem;
+    CPU cpu(mem, 1790000);
+
+    mem[0] = static_cast<uint8_t>(Opcode::STY_ABS);
+    mem[1] = 0x2F;
+    mem[2] = 0xFF;
+    cpu.Y = 0x55;
+
+    uint32_t cycles = cpu.Execute(1);
+    EXPECT_EQ(cpu.Y, mem[0xFF2F]);
+    EXPECT_EQ(cycles, 4);
 }
