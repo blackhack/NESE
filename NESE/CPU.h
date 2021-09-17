@@ -59,6 +59,9 @@ public:
     uint8_t CPU::GetByteFromAddress(uint16_t address);
     uint16_t CPU::GetWordFromAddress(uint16_t address);
 
+    void SetByte(uint16_t address, uint8_t data);
+    void SetWord(uint16_t address, uint16_t data);
+
     uint8_t LDA_IM();
     uint8_t LDA_ZP();
     uint8_t LDA_ZP_X();
@@ -73,6 +76,28 @@ public:
     uint8_t LDX_ZP_Y();
     uint8_t LDX_ABS();
     uint8_t LDX_ABS_Y();
+
+    uint8_t LDY_IM();
+    uint8_t LDY_ZP();
+    uint8_t LDY_ZP_X();
+    uint8_t LDY_ABS();
+    uint8_t LDY_ABS_X();
+
+    uint8_t STA_ZP();
+    uint8_t STA_ZP_X();
+    uint8_t STA_ABS();
+    uint8_t STA_ABS_X();
+    uint8_t STA_ABS_Y();
+    uint8_t STA_IND_X();
+    uint8_t STA_IND_Y();
+
+    uint8_t STX_ZP();
+    uint8_t STX_ZP_Y();
+    uint8_t STX_ABS();
+
+    uint8_t STY_ZP();
+    uint8_t STY_ZP_X();
+    uint8_t STY_ABS();
 
     Memory& memory;
     uint64_t cycle_period_ns;

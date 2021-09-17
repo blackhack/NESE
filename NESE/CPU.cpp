@@ -122,6 +122,17 @@ uint16_t CPU::GetWordFromAddress(uint16_t address)
     return data;
 }
 
+void CPU::SetByte(uint16_t address, uint8_t data)
+{
+    memory[address] = data;
+}
+
+void CPU::SetWord(uint16_t address, uint16_t data)
+{
+    memory[address] = data & 0xFF;
+    memory[address + 1] = data >> 8;
+}
+
 uint8_t CPU::LDA_IM()
 {
     A = GetByteFromPC();
@@ -296,4 +307,188 @@ uint8_t CPU::LDX_ABS_Y()
     PS.N = checkBit(X, 7);
 
     return (page_crossed ? 1 : 0);
+}
+
+uint8_t CPU::LDY_IM()
+{
+    Y = GetByteFromPC();
+    PS.Z = (Y == 0 ? 1 : 0);
+    PS.N = checkBit(Y, 7);
+
+    return 0;
+}
+
+uint8_t CPU::LDY_ZP()
+{
+    uint16_t address = GetByteFromPC();
+
+    Y = GetByteFromAddress(address);
+    PS.Z = (Y == 0 ? 1 : 0);
+    PS.N = checkBit(Y, 7);
+
+    return 0;
+}
+
+uint8_t CPU::LDY_ZP_X()
+{
+    uint16_t ZP_address = GetByteFromPC();
+
+    ZP_address += X;
+    ZP_address &= 0xFF;// This address require a truncation to 8 bits (zero page address)
+
+    Y = GetByteFromAddress(ZP_address);
+    PS.Z = (Y == 0 ? 1 : 0);
+    PS.N = checkBit(Y, 7);
+
+    return 0;
+}
+
+uint8_t CPU::LDY_ABS()
+{
+    uint16_t address = GetWordFromPC();
+
+    Y = GetByteFromAddress(address);
+    PS.Z = (Y == 0 ? 1 : 0);
+    PS.N = checkBit(Y, 7);
+
+    return 0;
+}
+
+uint8_t CPU::LDY_ABS_X()
+{
+    bool page_crossed = false;;
+
+    uint16_t base_address = GetWordFromPC();
+    uint16_t final_address = base_address + X;
+
+    if ((final_address ^ base_address) >> 8)
+        page_crossed = true;
+
+    Y = GetByteFromAddress(final_address);
+    PS.Z = (Y == 0 ? 1 : 0);
+    PS.N = checkBit(Y, 7);
+
+    return (page_crossed ? 1 : 0);
+}
+
+uint8_t CPU::STA_ZP()
+{
+    uint16_t ZP_address = GetByteFromPC();
+    SetByte(ZP_address, A);
+
+    return 0;
+}
+
+uint8_t CPU::STA_ZP_X()
+{
+    uint16_t ZP_address = GetByteFromPC();
+
+    ZP_address += X;
+    ZP_address &= 0xFF;// This address require a truncation to 8 bits (zero page address)
+
+    SetByte(ZP_address, A);
+
+    return 0;
+}
+
+uint8_t CPU::STA_ABS()
+{
+    uint16_t address = GetWordFromPC();
+    SetByte(address, A);
+
+    return 0;
+}
+
+uint8_t CPU::STA_ABS_X()
+{
+    uint16_t address = GetWordFromPC() + X;
+    SetByte(address, A);
+
+    return 0;
+}
+
+uint8_t CPU::STA_ABS_Y()
+{
+    uint16_t address = GetWordFromPC() + Y;
+    SetByte(address, A);
+
+    return 0;
+}
+
+uint8_t CPU::STA_IND_X()
+{
+    uint16_t ZP_address = GetByteFromPC();
+
+    ZP_address += X;
+    ZP_address &= 0xFF; // This address require a truncation to 8 bits (zero page address)
+
+    uint16_t final_address = GetWordFromAddress(ZP_address);
+    SetByte(final_address, A);
+
+    return 0;
+}
+
+uint8_t CPU::STA_IND_Y()
+{
+    uint16_t ZP_address = GetByteFromPC();
+    uint16_t final_address = GetWordFromAddress(ZP_address) + Y;
+    SetByte(final_address, A);
+
+    return 0;
+}
+
+uint8_t CPU::STX_ZP()
+{
+    uint16_t ZP_address = GetByteFromPC();
+    SetByte(ZP_address, X);
+
+    return 0;
+}
+
+uint8_t CPU::STX_ZP_Y()
+{
+    uint16_t ZP_address = GetByteFromPC();
+
+    ZP_address += Y;
+    ZP_address &= 0xFF;// This address require a truncation to 8 bits (zero page address)
+
+    SetByte(ZP_address, X);
+
+    return 0;
+}
+
+uint8_t CPU::STX_ABS()
+{
+    uint16_t address = GetWordFromPC();
+    SetByte(address, X);
+
+    return 0;
+}
+
+uint8_t CPU::STY_ZP()
+{
+    uint16_t ZP_address = GetByteFromPC();
+    SetByte(ZP_address, Y);
+
+    return 0;
+}
+
+uint8_t CPU::STY_ZP_X()
+{
+    uint16_t ZP_address = GetByteFromPC();
+
+    ZP_address += X;
+    ZP_address &= 0xFF;// This address require a truncation to 8 bits (zero page address)
+
+    SetByte(ZP_address, Y);
+
+    return 0;
+}
+
+uint8_t CPU::STY_ABS()
+{
+    uint16_t address = GetWordFromPC();
+    SetByte(address, Y);
+
+    return 0;
 }
