@@ -53,7 +53,6 @@ uint64_t GetNSTime()
 uint32_t CPU::Execute(uint32_t instructions_to_execute)
 {
     uint32_t total_cycles = 0;
-    Opcode instruction = Opcode::NULL_OP;
 
     while (instructions_to_execute > 0)
     {
