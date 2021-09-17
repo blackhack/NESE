@@ -45,14 +45,15 @@ enum class Opcode : uint8_t
     LDX_ABS_Y = 0xBE,
 };
 
-typedef std::function<bool(CPU*, uint32_t&)> OpcodeCallback;
+typedef std::function<uint8_t(CPU*)> OpcodeCallback;
 
 struct OpcodeHandler
 {
     OpcodeHandler();
-    OpcodeHandler(std::string opName, OpcodeCallback opCallback);
+    OpcodeHandler(std::string opName, uint8_t opBase_cycles, OpcodeCallback opCallback);
 
     std::string name;
+    uint8_t base_cycles;
     OpcodeCallback callback;
 };
 

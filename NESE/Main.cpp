@@ -23,7 +23,7 @@
 int main()
 {
     Memory ram;
-    CPU cpu(ram);
+    CPU cpu(ram, 1790000);
 
     ram[0] = static_cast<uint8_t>(Opcode::LDA_IM); // Opcode::LDA_IMM
     ram[1] = 0x31; // Random value for the opcode
@@ -33,9 +33,9 @@ int main()
 
     cpu.Reset();
 
-    cpu.Execute(2);
+    cpu.Execute(1);
     std::cout << std::hex << (int)cpu.A << std::endl;
-    cpu.Execute(3);
+    cpu.Execute(1);
     std::cout << std::hex << (int)cpu.A << std::endl;
 
     return 0;

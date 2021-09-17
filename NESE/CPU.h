@@ -30,7 +30,7 @@
 class CPU
 {
 public:
-    CPU(Memory& mem);
+    CPU(Memory& mem, uint32_t frequency);
 
     void Reset();
 
@@ -59,23 +59,23 @@ public:
     uint8_t CPU::GetByteFromAddress(uint16_t address);
     uint16_t CPU::GetWordFromAddress(uint16_t address);
 
-    bool LDA_IM(uint32_t& part);
-    bool LDA_ZP(uint32_t& part);
-    bool LDA_ZP_X(uint32_t& part);
-    bool LDA_ABS(uint32_t& part);
-    bool LDA_ABS_X(uint32_t& part);
-    bool LDA_ABS_Y(uint32_t& part);
-    bool LDA_IND_X(uint32_t& part);
-    bool LDA_IND_Y(uint32_t& part);
+    uint8_t LDA_IM();
+    uint8_t LDA_ZP();
+    uint8_t LDA_ZP_X();
+    uint8_t LDA_ABS();
+    uint8_t LDA_ABS_X();
+    uint8_t LDA_ABS_Y();
+    uint8_t LDA_IND_X();
+    uint8_t LDA_IND_Y();
 
-    bool LDX_IM(uint32_t& part);
-    bool LDX_ZP(uint32_t& part);
-    bool LDX_ZP_Y(uint32_t& part);
-    bool LDX_ABS(uint32_t& part);
-    bool LDX_ABS_Y(uint32_t& part);
+    uint8_t LDX_IM();
+    uint8_t LDX_ZP();
+    uint8_t LDX_ZP_Y();
+    uint8_t LDX_ABS();
+    uint8_t LDX_ABS_Y();
 
     Memory& memory;
-
+    uint64_t cycle_period_ns;
 };
 
 #endif // CPU_h__

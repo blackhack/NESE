@@ -23,25 +23,27 @@ OpcodeHandler::OpcodeHandler() : name(""), callback(nullptr)
 {
 }
 
-OpcodeHandler::OpcodeHandler(const std::string opName, OpcodeCallback opCallback) : name(opName), callback(opCallback)
+OpcodeHandler::OpcodeHandler(std::string opName, uint8_t opBase_cycles, OpcodeCallback opCallback)
 {
-
+    name = opName;
+    base_cycles = opBase_cycles;
+    callback = opCallback;
 }
 
-#define DEFINE_HANDLER(opcode, callback) { Opcode::opcode, OpcodeHandler(#opcode, callback) }
+#define DEFINE_HANDLER(opcode, base_cycles, callback) { Opcode::opcode, OpcodeHandler(#opcode, base_cycles, callback) }
 
 std::map<Opcode, OpcodeHandler> opcodesHandlers = {
-    DEFINE_HANDLER(LDA_IM, &CPU::LDA_IM),
-    DEFINE_HANDLER(LDA_ZP, &CPU::LDA_ZP),
-    DEFINE_HANDLER(LDA_ZP_X, &CPU::LDA_ZP_X),
-    DEFINE_HANDLER(LDA_ABS, &CPU::LDA_ABS),
-    DEFINE_HANDLER(LDA_ABS_X, &CPU::LDA_ABS_X),
-    DEFINE_HANDLER(LDA_ABS_Y, &CPU::LDA_ABS_Y),
-    DEFINE_HANDLER(LDA_IND_X, &CPU::LDA_IND_X),
-    DEFINE_HANDLER(LDA_IND_Y, &CPU::LDA_IND_Y),
-    DEFINE_HANDLER(LDX_IM, &CPU::LDX_IM),
-    DEFINE_HANDLER(LDX_ZP, &CPU::LDX_ZP),
-    DEFINE_HANDLER(LDX_ZP_Y, &CPU::LDX_ZP_Y),
-    DEFINE_HANDLER(LDX_ABS, &CPU::LDX_ABS),
-    DEFINE_HANDLER(LDX_ABS_Y, &CPU::LDX_ABS_Y),
+    DEFINE_HANDLER(LDA_IM, 2, &CPU::LDA_IM),
+    DEFINE_HANDLER(LDA_ZP, 3, &CPU::LDA_ZP),
+    DEFINE_HANDLER(LDA_ZP_X, 4, &CPU::LDA_ZP_X),
+    DEFINE_HANDLER(LDA_ABS, 4, &CPU::LDA_ABS),
+    DEFINE_HANDLER(LDA_ABS_X, 4, &CPU::LDA_ABS_X),
+    DEFINE_HANDLER(LDA_ABS_Y, 4, &CPU::LDA_ABS_Y),
+    DEFINE_HANDLER(LDA_IND_X, 6, &CPU::LDA_IND_X),
+    DEFINE_HANDLER(LDA_IND_Y, 5, &CPU::LDA_IND_Y),
+    DEFINE_HANDLER(LDX_IM, 2, &CPU::LDX_IM),
+    DEFINE_HANDLER(LDX_ZP, 3, &CPU::LDX_ZP),
+    DEFINE_HANDLER(LDX_ZP_Y, 4, &CPU::LDX_ZP_Y),
+    DEFINE_HANDLER(LDX_ABS, 4, &CPU::LDX_ABS),
+    DEFINE_HANDLER(LDX_ABS_Y, 4, &CPU::LDX_ABS_Y),
 };

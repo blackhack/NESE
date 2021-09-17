@@ -22,7 +22,7 @@
 
 TEST(LDA_Test, LDA_FlagsTest) {
     Memory mem;
-    CPU cpu(mem);
+    CPU cpu(mem, 1790000);
 
     mem[0] = static_cast<uint8_t>(Opcode::LDA_IM);
     mem[1] = 0x00; // Random value for the opcode
@@ -46,7 +46,7 @@ TEST(LDA_Test, LDA_FlagsTest) {
 
 TEST(LDA_Test, LDA_IM) {
     Memory mem;
-    CPU cpu(mem);
+    CPU cpu(mem, 1790000);
 
     mem[0] = static_cast<uint8_t>(Opcode::LDA_IM);
     mem[1] = 0x31; // Random value for the opcode
@@ -59,7 +59,7 @@ TEST(LDA_Test, LDA_IM) {
 
 TEST(LDA_Test, LDA_ZP) {
     Memory mem;
-    CPU cpu(mem);
+    CPU cpu(mem, 1790000);
 
     mem[0] = static_cast<uint8_t>(Opcode::LDA_ZP);
     mem[1] = 0xF3; // Random address for the opcode
@@ -72,7 +72,7 @@ TEST(LDA_Test, LDA_ZP) {
 
 TEST(LDA_Test, LDA_ZP_X) {
     Memory mem;
-    CPU cpu(mem);
+    CPU cpu(mem, 1790000);
 
     mem[0] = static_cast<uint8_t>(Opcode::LDA_ZP_X);
     mem[1] = 0x80; // Random address for the opcode
@@ -95,7 +95,7 @@ TEST(LDA_Test, LDA_ZP_X) {
 
 TEST(LDA_Test, LDA_ABS) {
     Memory mem;
-    CPU cpu(mem);
+    CPU cpu(mem, 1790000);
 
     mem[0] = static_cast<uint8_t>(Opcode::LDA_ABS);
     mem[1] = 0x2F;
@@ -109,7 +109,7 @@ TEST(LDA_Test, LDA_ABS) {
 
 TEST(LDA_Test, LDA_ABS_X) {
     Memory mem;
-    CPU cpu(mem);
+    CPU cpu(mem, 1790000);
 
     mem[0] = static_cast<uint8_t>(Opcode::LDA_ABS_X);
     mem[1] = 0xCC;
@@ -138,7 +138,7 @@ TEST(LDA_Test, LDA_ABS_X) {
 
 TEST(LDA_Test, LDA_ABS_Y) {
     Memory mem;
-    CPU cpu(mem);
+    CPU cpu(mem, 1790000);
 
     mem[0] = static_cast<uint8_t>(Opcode::LDA_ABS_Y);
     mem[1] = 0xCC;
@@ -167,7 +167,7 @@ TEST(LDA_Test, LDA_ABS_Y) {
 
 TEST(LDA_Test, LDA_IND_X) {
     Memory mem;
-    CPU cpu(mem);
+    CPU cpu(mem, 1790000);
 
     mem[0] = static_cast<uint8_t>(Opcode::LDA_IND_X);
     mem[1] = 0x3E;
@@ -183,7 +183,7 @@ TEST(LDA_Test, LDA_IND_X) {
 
 TEST(LDA_Test, LDA_IND_Y) {
     Memory mem;
-    CPU cpu(mem);
+    CPU cpu(mem, 1790000);
 
     mem[0] = static_cast<uint8_t>(Opcode::LDA_IND_Y);
     mem[1] = 0x4C;

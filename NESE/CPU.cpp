@@ -18,9 +18,12 @@
 
 #include "CPU.h"
 #include <iostream>
+#include <chrono>
+#include <thread>
 
-CPU::CPU(Memory& mem) : memory(mem)
+CPU::CPU(Memory& mem, uint32_t frequency) : memory(mem)
 {
+    cycle_period_ns = static_cast<uint64_t>((1.0 / frequency) * 1000000000);
     Reset();
 }
 
@@ -41,44 +44,52 @@ void CPU::Reset()
     PS.N = 0;
 }
 
+uint64_t GetNSTime()
+{
+    static const std::chrono::high_resolution_clock::time_point start_time = std::chrono::high_resolution_clock::now();
+    return uint64_t(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - start_time).count());
+}
+
 uint32_t CPU::Execute(uint32_t instructions_to_execute)
 {
-    uint32_t cycles = 0;
+    uint32_t total_cycles = 0;
     Opcode instruction = Opcode::NULL_OP;
-    uint32_t opcode_part = 0;
-    bool instruction_finished = true;
 
     while (instructions_to_execute > 0)
     {
-        if (instruction_finished)
-        {
-            instruction = static_cast<Opcode>(GetByteFromPC());
-            opcode_part = 0;
-            instruction_finished = false;
-            ++cycles;
-            continue;
-        }
+        uint64_t start_time = GetNSTime();
+
+        Opcode instruction = static_cast<Opcode>(GetByteFromPC());
+        uint8_t instruction_cycles = 0;
 
         if (opcodesHandlers.find(instruction) == opcodesHandlers.end())
         {
-            instruction_finished = true;
+            ++instruction_cycles;
             std::cout << "Unk opcode: " << std::hex << (uint16_t)instruction << "\n";
         }
         else
         {
             OpcodeHandler op_handler = opcodesHandlers.at(instruction);
-            instruction_finished = op_handler.callback(this, opcode_part);
+            instruction_cycles += op_handler.base_cycles;
+            instruction_cycles += op_handler.callback(this);
         }
 
+        total_cycles += instruction_cycles;
+        --instructions_to_execute;
 
-        if (instruction_finished)
-            --instructions_to_execute;
+        uint64_t end_time = GetNSTime();
+        uint64_t elapse_instruction_time = end_time - start_time;
+        uint64_t expected_instruction_time = cycle_period_ns * instruction_cycles;
+        if (elapse_instruction_time < expected_instruction_time)
+        {
+            //std::cout << "Elapse: " << elapse_instruction_time << " - Expected: " << expected_instruction_time << " - Sleeping for: " << expected_instruction_time - elapse_instruction_time << "\n";
+            std::this_thread::sleep_for(std::chrono::nanoseconds(expected_instruction_time - elapse_instruction_time));
+        }
 
-        ++opcode_part;
-        ++cycles;
+        //std::cout << "Final instruction time: " << GetNSTime() - start_time << "ns\n";
     }
 
-    return cycles;
+    return total_cycles;
 }
 
 uint8_t CPU::GetByteFromPC()
@@ -112,324 +123,217 @@ uint16_t CPU::GetWordFromAddress(uint16_t address)
     return data;
 }
 
-bool CPU::LDA_IM(uint32_t& part)
+uint8_t CPU::LDA_IM()
 {
     A = GetByteFromPC();
     PS.Z = (A == 0 ? 1 : 0);
     PS.N = checkBit(A, 7);
 
-    return true;
+    return 0;
 }
 
-bool CPU::LDA_ZP(uint32_t& part)
+uint8_t CPU::LDA_ZP()
 {
-    static uint16_t address;
-    
-    switch (part)
-    {
-        case 0:
-            address = GetByteFromPC();
-            break;
-        case 1:
-            A = GetByteFromAddress(address);
-            PS.Z = (A == 0 ? 1 : 0);
-            PS.N = checkBit(A, 7);
-            break;
-    }
+    uint16_t address;
 
-    return part == 1;
+    address = GetByteFromPC();
+    A = GetByteFromAddress(address);
+    PS.Z = (A == 0 ? 1 : 0);
+    PS.N = checkBit(A, 7);
+
+    return 0;
 }
 
-bool CPU::LDA_ZP_X(uint32_t& part)
+uint8_t CPU::LDA_ZP_X()
 {
-    static uint16_t ZP_address;
+    uint16_t ZP_address;
 
-    switch (part)
-    {
-    case 0:
-        ZP_address = GetByteFromPC();
-        break;
-    case 1:
-        ZP_address += X;
-        ZP_address &= 0xFF;// This address require a truncation to 8 bits (zero page address)
-        break;
-    case 2:
-        A = GetByteFromAddress(ZP_address);
-        PS.Z = (A == 0 ? 1 : 0);
-        PS.N = checkBit(A, 7);
-        break;
-    }
+    ZP_address = GetByteFromPC();
 
-    return part == 2;
+    ZP_address += X;
+    ZP_address &= 0xFF;// This address require a truncation to 8 bits (zero page address)
+
+    A = GetByteFromAddress(ZP_address);
+    PS.Z = (A == 0 ? 1 : 0);
+    PS.N = checkBit(A, 7);
+
+    return 0;
 }
 
-bool CPU::LDA_ABS(uint32_t& part)
+uint8_t CPU::LDA_ABS()
 {
-    static uint16_t address;
+    uint16_t address;
 
-    switch (part)
-    {
-    case 0:
-        address = GetWordFromPC();
-        break;
-    case 1:
-        // Original CPU takes two cycles to fetch the address 2 bytes
-        break;
-    case 2:
-        A = GetByteFromAddress(address);
-        PS.Z = (A == 0 ? 1 : 0);
-        PS.N = checkBit(A, 7);
-        break;
-    }
+    address = GetWordFromPC();
 
-    return part == 2;
+    A = GetByteFromAddress(address);
+    PS.Z = (A == 0 ? 1 : 0);
+    PS.N = checkBit(A, 7);
+
+    return 0;
 }
 
-bool CPU::LDA_ABS_X(uint32_t& part)
+uint8_t CPU::LDA_ABS_X()
 {
-    static uint16_t base_address;
-    static uint16_t final_address;
-    static bool page_crossed;
+    uint16_t base_address;
+    uint16_t final_address;
+    bool page_crossed = false;
 
-    switch (part)
-    {
-    case 0:
-        base_address = GetWordFromPC();
-        page_crossed = false; // Just initializing for now
-        break;
-    case 1:
-        // Original CPU takes two cycles to fetch the address 2 bytes
+    base_address = GetWordFromPC();
+    final_address = base_address + X;
 
-        final_address = base_address + X;
+    if ((final_address ^ base_address) >> 8)
+        page_crossed = true;
 
-        if ((final_address ^ base_address) >> 8)
-            page_crossed = true;
-        break;
-    case 2:
-        A = GetByteFromAddress(final_address);
-        PS.Z = (A == 0 ? 1 : 0);
-        PS.N = checkBit(A, 7);
-        break;
-    case 3:
-        // When page is crossed it requires an extra cycle
-        break;
-    }
+    A = GetByteFromAddress(final_address);
+    PS.Z = (A == 0 ? 1 : 0);
+    PS.N = checkBit(A, 7);
+
 
     if (page_crossed)
-        return part == 3;
+        return 1;
     else
-        return part == 2;
+        return 0;
 }
 
 
-bool CPU::LDA_ABS_Y(uint32_t& part)
+uint8_t CPU::LDA_ABS_Y()
 {
-    static uint16_t base_address;
-    static uint16_t final_address;
-    static bool page_crossed;
+    uint16_t base_address;
+    uint16_t final_address;
+    bool page_crossed = false;
 
-    switch (part)
-    {
-    case 0:
-        base_address = GetWordFromPC();
-        page_crossed = false; // Just initializing for now
-        break;
-    case 1:
-        // Original CPU takes two cycles to fetch the address 2 bytes
+    base_address = GetWordFromPC();
 
-        final_address = base_address + Y;
+    final_address = base_address + Y;
 
-        if ((final_address ^ base_address) >> 8)
-            page_crossed = true;
-        break;
-    case 2:
-        A = GetByteFromAddress(final_address);
-        PS.Z = (A == 0 ? 1 : 0);
-        PS.N = checkBit(A, 7);
-        break;
-    case 3:
-        // When page is crossed it requires an extra cycle
-        break;
-    }
+    if ((final_address ^ base_address) >> 8)
+        page_crossed = true;
+
+    A = GetByteFromAddress(final_address);
+    PS.Z = (A == 0 ? 1 : 0);
+    PS.N = checkBit(A, 7);
 
     if (page_crossed)
-        return part == 3;
+        return 1;
     else
-        return part == 2;
+        return 0;
 }
 
-bool CPU::LDA_IND_X(uint32_t& part)
+uint8_t CPU::LDA_IND_X()
 {
-    static uint16_t ZP_address;
-    static uint16_t final_address;
+    uint16_t ZP_address;
+    uint16_t final_address;
 
-    switch (part)
-    {
-    case 0:
-        ZP_address = GetByteFromPC();
-        break;
-    case 1:
-        ZP_address += X;
-        ZP_address &= 0xFF; // This address require a truncation to 8 bits (zero page address)
-        break;
-    case 2:
-        final_address = GetWordFromAddress(ZP_address);
-        break;
-    case 3:
-        // Original CPU takes two cycles to fetch the address 2 bytes
-        break;
-    case 4:
-        A = GetByteFromAddress(final_address);
-        PS.Z = (A == 0 ? 1 : 0);
-        PS.N = checkBit(A, 7);
-        break;
-    }
+    ZP_address = GetByteFromPC();
 
-    return part == 4;
+    ZP_address += X;
+    ZP_address &= 0xFF; // This address require a truncation to 8 bits (zero page address)
+
+    final_address = GetWordFromAddress(ZP_address);
+
+    A = GetByteFromAddress(final_address);
+    PS.Z = (A == 0 ? 1 : 0);
+    PS.N = checkBit(A, 7);
+
+    return 0;
 }
 
-bool CPU::LDA_IND_Y(uint32_t& part)
+uint8_t CPU::LDA_IND_Y()
 {
-    static uint16_t ZP_address;
-    static uint16_t base_address;
-    static uint16_t final_address;
-    static bool page_crossed;
+    uint16_t ZP_address;
+    uint16_t base_address;
+    uint16_t final_address;
+    bool page_crossed = false;;
 
-    switch (part)
-    {
-    case 0:
-        ZP_address = GetByteFromPC();
-        page_crossed = false;
-        break;
-    case 1:
-        base_address = GetWordFromAddress(ZP_address);
-    case 2:
-        // Original CPU takes two cycles to fetch the address 2 bytes
+    ZP_address = GetByteFromPC();
 
-        final_address = base_address + Y;
-        if ((final_address ^ base_address) >> 8)
-            page_crossed = true;
-        break;
-    case 3:
-        A = GetByteFromAddress(final_address);
-        PS.Z = (A == 0 ? 1 : 0);
-        PS.N = checkBit(A, 7);
-        break;
-    case 4:
-        break;
-    }
+    base_address = GetWordFromAddress(ZP_address);
+
+    final_address = base_address + Y;
+    if ((final_address ^ base_address) >> 8)
+        page_crossed = true;
+
+    A = GetByteFromAddress(final_address);
+    PS.Z = (A == 0 ? 1 : 0);
+    PS.N = checkBit(A, 7);
 
     if (page_crossed)
-        return part == 4;
+        return 1;
     else
-        return part == 3;
+        return 0;
 }
 
-bool CPU::LDX_IM(uint32_t& part)
+uint8_t CPU::LDX_IM()
 {
     X = GetByteFromPC();
     PS.Z = (X == 0 ? 1 : 0);
     PS.N = checkBit(X, 7);
 
-    return true;
+    return 0;
 }
 
-bool CPU::LDX_ZP(uint32_t& part)
+uint8_t CPU::LDX_ZP()
 {
-    static uint16_t address;
+    uint16_t address;
 
-    switch (part)
-    {
-    case 0:
-        address = GetByteFromPC();
-        break;
-    case 1:
-        X = GetByteFromAddress(address);
-        PS.Z = (X == 0 ? 1 : 0);
-        PS.N = checkBit(X, 7);
-        break;
-    }
+    address = GetByteFromPC();
 
-    return part == 1;
+    X = GetByteFromAddress(address);
+    PS.Z = (X == 0 ? 1 : 0);
+    PS.N = checkBit(X, 7);
+
+    return 0;
 }
 
-bool CPU::LDX_ZP_Y(uint32_t& part)
+uint8_t CPU::LDX_ZP_Y()
 {
-    static uint16_t ZP_address;
+    uint16_t ZP_address;
 
-    switch (part)
-    {
-    case 0:
-        ZP_address = GetByteFromPC();
-        break;
-    case 1:
-        ZP_address += Y;
-        ZP_address &= 0xFF;// This address require a truncation to 8 bits (zero page address)
-        break;
-    case 2:
-        X = GetByteFromAddress(ZP_address);
-        PS.Z = (X == 0 ? 1 : 0);
-        PS.N = checkBit(X, 7);
-        break;
-    }
+    ZP_address = GetByteFromPC();
 
-    return part == 2;
+    ZP_address += Y;
+    ZP_address &= 0xFF;// This address require a truncation to 8 bits (zero page address)
+
+    X = GetByteFromAddress(ZP_address);
+    PS.Z = (X == 0 ? 1 : 0);
+    PS.N = checkBit(X, 7);
+
+    return 0;
 }
 
-bool CPU::LDX_ABS(uint32_t& part)
+uint8_t CPU::LDX_ABS()
 {
-    static uint16_t address;
+    uint16_t address;
 
-    switch (part)
-    {
-    case 0:
-        address = GetWordFromPC();
-        break;
-    case 1:
-        // Original CPU takes two cycles to fetch the address 2 bytes
-        break;
-    case 2:
-        X = GetByteFromAddress(address);
-        PS.Z = (X == 0 ? 1 : 0);
-        PS.N = checkBit(X, 7);
-        break;
-    }
+    address = GetWordFromPC();
 
-    return part == 2;
+    X = GetByteFromAddress(address);
+    PS.Z = (X == 0 ? 1 : 0);
+    PS.N = checkBit(X, 7);
+
+    return 0;
 }
 
-bool CPU::LDX_ABS_Y(uint32_t& part)
+uint8_t CPU::LDX_ABS_Y()
 {
-    static uint16_t base_address;
-    static uint16_t final_address;
-    static bool page_crossed;
+    uint16_t base_address;
+    uint16_t final_address;
+    bool page_crossed = false;;
 
-    switch (part)
-    {
-    case 0:
-        base_address = GetWordFromPC();
-        page_crossed = false; // Just initializing for now
-        break;
-    case 1:
-        // Original CPU takes two cycles to fetch the address 2 bytes
+    base_address = GetWordFromPC();
 
-        final_address = base_address + Y;
+    final_address = base_address + Y;
 
-        if ((final_address ^ base_address) >> 8)
-            page_crossed = true;
-        break;
-    case 2:
-        X = GetByteFromAddress(final_address);
-        PS.Z = (X == 0 ? 1 : 0);
-        PS.N = checkBit(X, 7);
-        break;
-    case 3:
-        // When page is crossed it requires an extra cycle
-        break;
-    }
+    if ((final_address ^ base_address) >> 8)
+        page_crossed = true;
+
+    X = GetByteFromAddress(final_address);
+    PS.Z = (X == 0 ? 1 : 0);
+    PS.N = checkBit(X, 7);
 
     if (page_crossed)
-        return part == 3;
+        return 1;
     else
-        return part == 2;
+        return 0;
 }
