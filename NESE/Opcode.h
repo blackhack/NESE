@@ -65,6 +65,11 @@ enum class Opcode : uint8_t
     STY_ZP = 0x84,
     STY_ZP_X = 0x94,
     STY_ABS = 0x8C,
+
+    TAX = 0xAA,
+    TAY = 0xA8,
+    TXA = 0x8A,
+    TYA = 0x98,
 };
 
 typedef std::function<uint8_t(CPU*)> OpcodeCallback;

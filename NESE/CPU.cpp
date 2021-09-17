@@ -492,3 +492,39 @@ uint8_t CPU::STY_ABS()
 
     return 0;
 }
+
+uint8_t CPU::TAX()
+{
+    X = A;
+    PS.Z = (X == 0 ? 1 : 0);
+    PS.N = checkBit(X, 7);
+
+    return 0;
+}
+
+uint8_t CPU::TAY()
+{
+    Y = A;
+    PS.Z = (Y == 0 ? 1 : 0);
+    PS.N = checkBit(Y, 7);
+
+    return 0;
+}
+
+uint8_t CPU::TXA()
+{
+    A = X;
+    PS.Z = (A == 0 ? 1 : 0);
+    PS.N = checkBit(A, 7);
+
+    return 0;
+}
+
+uint8_t CPU::TYA()
+{
+    A = Y;
+    PS.Z = (A == 0 ? 1 : 0);
+    PS.N = checkBit(A, 7);
+
+    return 0;
+}

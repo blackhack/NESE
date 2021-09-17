@@ -99,6 +99,11 @@ public:
     uint8_t STY_ZP_X();
     uint8_t STY_ABS();
 
+    uint8_t TAX();
+    uint8_t TAY();
+    uint8_t TXA();
+    uint8_t TYA();
+
     Memory& memory;
     uint64_t cycle_period_ns;
 };
