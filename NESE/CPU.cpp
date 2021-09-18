@@ -606,3 +606,364 @@ uint8_t CPU::PLP()
 
     return 0;
 }
+
+uint8_t CPU::AND_IM()
+{
+    A &= GetByteFromPC();
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return 0;
+}
+
+uint8_t CPU::AND_ZP()
+{
+    uint16_t address = GetByteFromPC();
+    A &= GetByteFromAddress(address);
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return 0;
+}
+
+uint8_t CPU::AND_ZP_X()
+{
+    uint16_t ZP_address = GetByteFromPC();
+
+    ZP_address += X;
+    ZP_address &= 0xFF;// This address require a truncation to 8 bits (zero page address)
+
+    A &= GetByteFromAddress(ZP_address);
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return 0;
+}
+
+uint8_t CPU::AND_ABS()
+{
+    uint16_t address = GetWordFromPC();
+
+    A &= GetByteFromAddress(address);
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return 0;
+}
+
+uint8_t CPU::AND_ABS_X()
+{
+    bool page_crossed = false;
+
+    uint16_t base_address = GetWordFromPC();
+    uint16_t final_address = base_address + X;
+
+    if ((final_address ^ base_address) >> 8)
+        page_crossed = true;
+
+    A &= GetByteFromAddress(final_address);
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return (page_crossed ? 1 : 0);
+}
+
+uint8_t CPU::AND_ABS_Y()
+{
+    bool page_crossed = false;
+
+    uint16_t base_address = GetWordFromPC();
+    uint16_t final_address = base_address + Y;
+
+    if ((final_address ^ base_address) >> 8)
+        page_crossed = true;
+
+    A &= GetByteFromAddress(final_address);
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return (page_crossed ? 1 : 0);
+}
+
+uint8_t CPU::AND_IND_X()
+{
+    uint16_t ZP_address = GetByteFromPC();
+
+    ZP_address += X;
+    ZP_address &= 0xFF; // This address require a truncation to 8 bits (zero page address)
+
+    uint16_t final_address = GetWordFromAddress(ZP_address);
+
+    A &= GetByteFromAddress(final_address);
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return 0;
+}
+
+uint8_t CPU::AND_IND_Y()
+{
+    bool page_crossed = false;;
+
+    uint16_t ZP_address = GetByteFromPC();
+    uint16_t base_address = GetWordFromAddress(ZP_address);
+
+    uint16_t final_address = base_address + Y;
+    if ((final_address ^ base_address) >> 8)
+        page_crossed = true;
+
+    A &= GetByteFromAddress(final_address);
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return (page_crossed ? 1 : 0);
+}
+
+uint8_t CPU::EOR_IM()
+{
+    A ^= GetByteFromPC();
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return 0;
+}
+
+uint8_t CPU::EOR_ZP()
+{
+    uint16_t address = GetByteFromPC();
+    A ^= GetByteFromAddress(address);
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return 0;
+}
+
+uint8_t CPU::EOR_ZP_X()
+{
+    uint16_t ZP_address = GetByteFromPC();
+
+    ZP_address += X;
+    ZP_address &= 0xFF;// This address require a truncation to 8 bits (zero page address)
+
+    A ^= GetByteFromAddress(ZP_address);
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return 0;
+}
+
+uint8_t CPU::EOR_ABS()
+{
+    uint16_t address = GetWordFromPC();
+
+    A ^= GetByteFromAddress(address);
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return 0;
+}
+
+uint8_t CPU::EOR_ABS_X()
+{
+    bool page_crossed = false;
+
+    uint16_t base_address = GetWordFromPC();
+    uint16_t final_address = base_address + X;
+
+    if ((final_address ^ base_address) >> 8)
+        page_crossed = true;
+
+    A ^= GetByteFromAddress(final_address);
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return (page_crossed ? 1 : 0);
+}
+
+uint8_t CPU::EOR_ABS_Y()
+{
+    bool page_crossed = false;
+
+    uint16_t base_address = GetWordFromPC();
+    uint16_t final_address = base_address + Y;
+
+    if ((final_address ^ base_address) >> 8)
+        page_crossed = true;
+
+    A ^= GetByteFromAddress(final_address);
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return (page_crossed ? 1 : 0);
+}
+
+uint8_t CPU::EOR_IND_X()
+{
+    uint16_t ZP_address = GetByteFromPC();
+
+    ZP_address += X;
+    ZP_address &= 0xFF; // This address require a truncation to 8 bits (zero page address)
+
+    uint16_t final_address = GetWordFromAddress(ZP_address);
+
+    A ^= GetByteFromAddress(final_address);
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return 0;
+}
+
+uint8_t CPU::EOR_IND_Y()
+{
+    bool page_crossed = false;;
+
+    uint16_t ZP_address = GetByteFromPC();
+    uint16_t base_address = GetWordFromAddress(ZP_address);
+
+    uint16_t final_address = base_address + Y;
+    if ((final_address ^ base_address) >> 8)
+        page_crossed = true;
+
+    A ^= GetByteFromAddress(final_address);
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return (page_crossed ? 1 : 0);
+}
+
+uint8_t CPU::ORA_IM()
+{
+    A |= GetByteFromPC();
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return 0;
+}
+
+uint8_t CPU::ORA_ZP()
+{
+    uint16_t address = GetByteFromPC();
+    A |= GetByteFromAddress(address);
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return 0;
+}
+
+uint8_t CPU::ORA_ZP_X()
+{
+    uint16_t ZP_address = GetByteFromPC();
+
+    ZP_address += X;
+    ZP_address &= 0xFF;// This address require a truncation to 8 bits (zero page address)
+
+    A |= GetByteFromAddress(ZP_address);
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return 0;
+}
+
+uint8_t CPU::ORA_ABS()
+{
+    uint16_t address = GetWordFromPC();
+
+    A |= GetByteFromAddress(address);
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return 0;
+}
+
+uint8_t CPU::ORA_ABS_X()
+{
+    bool page_crossed = false;
+
+    uint16_t base_address = GetWordFromPC();
+    uint16_t final_address = base_address + X;
+
+    if ((final_address ^ base_address) >> 8)
+        page_crossed = true;
+
+    A |= GetByteFromAddress(final_address);
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return (page_crossed ? 1 : 0);
+}
+
+uint8_t CPU::ORA_ABS_Y()
+{
+    bool page_crossed = false;
+
+    uint16_t base_address = GetWordFromPC();
+    uint16_t final_address = base_address + Y;
+
+    if ((final_address ^ base_address) >> 8)
+        page_crossed = true;
+
+    A |= GetByteFromAddress(final_address);
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return (page_crossed ? 1 : 0);
+}
+
+uint8_t CPU::ORA_IND_X()
+{
+    uint16_t ZP_address = GetByteFromPC();
+
+    ZP_address += X;
+    ZP_address &= 0xFF; // This address require a truncation to 8 bits (zero page address)
+
+    uint16_t final_address = GetWordFromAddress(ZP_address);
+
+    A |= GetByteFromAddress(final_address);
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return 0;
+}
+
+uint8_t CPU::ORA_IND_Y()
+{
+    bool page_crossed = false;;
+
+    uint16_t ZP_address = GetByteFromPC();
+    uint16_t base_address = GetWordFromAddress(ZP_address);
+
+    uint16_t final_address = base_address + Y;
+    if ((final_address ^ base_address) >> 8)
+        page_crossed = true;
+
+    A |= GetByteFromAddress(final_address);
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return (page_crossed ? 1 : 0);
+}
+
+uint8_t CPU::BIT_ZP()
+{
+    uint16_t address = GetByteFromPC();
+    uint8_t data = GetByteFromAddress(address);
+    uint8_t result = A & data;
+    PS.flags.Z = (result == 0 ? 1 : 0);
+    PS.flags.V = checkBit(data, 6);
+    PS.flags.N = checkBit(data, 7);
+
+    return 0;
+}
+
+uint8_t CPU::BIT_ABS()
+{
+    uint16_t address = GetWordFromPC();
+    uint8_t data = GetByteFromAddress(address);
+    uint8_t result = A & data;
+
+    PS.flags.Z = (result == 0 ? 1 : 0);
+    PS.flags.V = checkBit(data, 6);
+    PS.flags.N = checkBit(data, 7);
+
+    return 0;
+}

@@ -122,6 +122,36 @@ public:
     uint8_t PLA();
     uint8_t PLP();
 
+    uint8_t AND_IM();
+    uint8_t AND_ZP();
+    uint8_t AND_ZP_X();
+    uint8_t AND_ABS();
+    uint8_t AND_ABS_X();
+    uint8_t AND_ABS_Y();
+    uint8_t AND_IND_X();
+    uint8_t AND_IND_Y();
+
+    uint8_t EOR_IM();
+    uint8_t EOR_ZP();
+    uint8_t EOR_ZP_X();
+    uint8_t EOR_ABS();
+    uint8_t EOR_ABS_X();
+    uint8_t EOR_ABS_Y();
+    uint8_t EOR_IND_X();
+    uint8_t EOR_IND_Y();
+
+    uint8_t ORA_IM();
+    uint8_t ORA_ZP();
+    uint8_t ORA_ZP_X();
+    uint8_t ORA_ABS();
+    uint8_t ORA_ABS_X();
+    uint8_t ORA_ABS_Y();
+    uint8_t ORA_IND_X();
+    uint8_t ORA_IND_Y();
+
+    uint8_t BIT_ZP();
+    uint8_t BIT_ABS();
+
     Memory& memory;
     uint64_t cycle_period_ns;
 };
