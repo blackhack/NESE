@@ -70,6 +70,13 @@ enum class Opcode : uint8_t
     TAY = 0xA8,
     TXA = 0x8A,
     TYA = 0x98,
+
+    TSX = 0xBA,
+    TXS = 0x9A,
+    PHA = 0x48,
+    PHP = 0x08,
+    PLA = 0x68,
+    PLP = 0x28,
 };
 
 typedef std::function<uint8_t(CPU*)> OpcodeCallback;

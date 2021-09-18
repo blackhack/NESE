@@ -30,6 +30,7 @@ add_executable(
   MemoryTest.cpp
   LoadStoreTest.cpp
   RegisterTransfersTest.cpp
+  StackOperationsTest.cpp
 )
 target_link_libraries(
   UnitTesting

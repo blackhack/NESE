@@ -41,16 +41,21 @@ public:
     uint8_t X; // Index Register X
     uint8_t Y; // Index Register Y
 
-    struct ProcessorStatus
+    union
     {
-        uint8_t C : 1; // Carry Flag
-        uint8_t Z : 1; // Zero Flag
-        uint8_t I : 1; // Interrupt Disable
-        uint8_t D : 1; // Decimal Mode
-        uint8_t B : 1; // Break Command
-        uint8_t : 1; // Unused
-        uint8_t V : 1; // Overflow Flag
-        uint8_t N : 1; // Negative Flag
+        struct ProcessorStatus
+        {
+            uint8_t C : 1; // Carry Flag
+            uint8_t Z : 1; // Zero Flag
+            uint8_t I : 1; // Interrupt Disable
+            uint8_t D : 1; // Decimal Mode
+            uint8_t B : 1; // Break Command
+            uint8_t : 1; // Unused
+            uint8_t V : 1; // Overflow Flag
+            uint8_t N : 1; // Negative Flag
+        } flags;
+
+        uint8_t PS_byte;
     } PS;
 
     uint32_t Execute(uint32_t instructions_to_execute);
@@ -61,6 +66,12 @@ public:
 
     void SetByte(uint16_t address, uint8_t data);
     void SetWord(uint16_t address, uint16_t data);
+
+    void PushByteToStack(uint8_t data);
+    void PushWordToStack(uint16_t data);
+    uint8_t PullByteFromStack();
+    uint16_t PullWordFromStack();
+
 
     uint8_t LDA_IM();
     uint8_t LDA_ZP();
@@ -103,6 +114,13 @@ public:
     uint8_t TAY();
     uint8_t TXA();
     uint8_t TYA();
+
+    uint8_t TSX();
+    uint8_t TXS();
+    uint8_t PHA();
+    uint8_t PHP();
+    uint8_t PLA();
+    uint8_t PLP();
 
     Memory& memory;
     uint64_t cycle_period_ns;

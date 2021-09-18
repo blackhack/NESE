@@ -74,4 +74,11 @@ std::map<Opcode, OpcodeHandler> opcodesHandlers = {
     DEFINE_HANDLER(TAY, 2, &CPU::TAY),
     DEFINE_HANDLER(TXA, 2, &CPU::TXA),
     DEFINE_HANDLER(TYA, 2, &CPU::TYA),
+
+    DEFINE_HANDLER(TSX, 2, &CPU::TSX),
+    DEFINE_HANDLER(TXS, 2, &CPU::TXS),
+    DEFINE_HANDLER(PHA, 3, &CPU::PHA),
+    DEFINE_HANDLER(PHP, 3, &CPU::PHP),
+    DEFINE_HANDLER(PLA, 4, &CPU::PLA),
+    DEFINE_HANDLER(PLP, 4, &CPU::PLP),
 };

@@ -32,14 +32,14 @@ TEST(LoadStoreTest, LDA_FlagsTest) {
     mem[5] = 0xFF; // Random value for the opcode
 
     cpu.Execute(1);
-    EXPECT_EQ(cpu.PS.Z, 1);
-    EXPECT_EQ(cpu.PS.N, 0);
+    EXPECT_EQ(cpu.PS.flags.Z, 1);
+    EXPECT_EQ(cpu.PS.flags.N, 0);
     cpu.Execute(1);
-    EXPECT_EQ(cpu.PS.Z, 0);
-    EXPECT_EQ(cpu.PS.N, 0);
+    EXPECT_EQ(cpu.PS.flags.Z, 0);
+    EXPECT_EQ(cpu.PS.flags.N, 0);
     cpu.Execute(1);
-    EXPECT_EQ(cpu.PS.Z, 0);
-    EXPECT_EQ(cpu.PS.N, 1);
+    EXPECT_EQ(cpu.PS.flags.Z, 0);
+    EXPECT_EQ(cpu.PS.flags.N, 1);
 
 }
 
