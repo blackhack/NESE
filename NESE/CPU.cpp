@@ -1928,3 +1928,36 @@ uint8_t CPU::ROR_ABS_X()
 
     return (page_crossed ? 1 : 0);
 }
+
+uint8_t CPU::JMP_ABS()
+{
+    uint16_t address = GetWordFromPC();
+    PC = address;
+
+    return 0;
+}
+
+uint8_t CPU::JMP_IND()
+{
+    uint16_t base_address = GetWordFromPC();
+    uint16_t final_address = GetWordFromAddress(base_address);
+    PC = final_address;
+
+    return 0;
+}
+
+uint8_t CPU::JSR_ABS()
+{
+    uint16_t address = GetWordFromPC();
+    PushWordToStack(PC - 1);
+    PC = address;
+
+    return 0;
+}
+
+uint8_t CPU::RTS()
+{
+    PC = PullWordFromStack() + 1;
+
+    return 0;
+}

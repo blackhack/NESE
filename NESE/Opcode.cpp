@@ -186,4 +186,9 @@ std::map<Opcode, OpcodeHandler> opcodesHandlers = {
     DEFINE_HANDLER(ROR_ZP_X,  6, &CPU::ROR_ZP_X),
     DEFINE_HANDLER(ROR_ABS,   6, &CPU::ROR_ABS),
     DEFINE_HANDLER(ROR_ABS_X, 7, &CPU::ROR_ABS_X),
+
+    DEFINE_HANDLER(JMP_ABS,   3, &CPU::JMP_ABS),
+    DEFINE_HANDLER(JMP_IND,   5, &CPU::JMP_IND),
+    DEFINE_HANDLER(JSR_ABS,   6, &CPU::JSR_ABS),
+    DEFINE_HANDLER(RTS,       6, &CPU::RTS),
 };

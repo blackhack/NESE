@@ -182,6 +182,13 @@ enum class Opcode : uint8_t
     ROR_ZP_X = 0x76,
     ROR_ABS = 0x6E,
     ROR_ABS_X = 0x7E,
+
+    JMP_ABS = 0x4C,
+    JMP_IND = 0x6C,
+
+    JSR_ABS = 0x20,
+
+    RTS = 0x60,
 };
 
 typedef std::function<uint8_t(CPU*)> OpcodeCallback;

@@ -230,6 +230,13 @@ public:
     uint8_t ROR_ABS();
     uint8_t ROR_ABS_X();
 
+    uint8_t JMP_ABS();
+    uint8_t JMP_IND();
+
+    uint8_t JSR_ABS();
+
+    uint8_t RTS();
+
     Memory& memory;
     uint64_t cycle_period_ns;
 };
