@@ -22,7 +22,7 @@
 #include <cstdint>
 #include <array>
 
-constexpr uint16_t MAX_MEMORY = 0xFFFF;
+constexpr uint32_t MAX_MEMORY = 1024*64;
 
 class Memory
 {

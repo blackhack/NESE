@@ -37,7 +37,8 @@ add_executable(
   ShiftsTest.cpp
   JumpsCallsTest.cpp
   BranchesTest.cpp
-  StatusFlagChanges.cpp 
+  StatusFlagChanges.cpp
+  SystemFunctions.cpp
 )
 target_link_libraries(
   UnitTesting

@@ -586,6 +586,8 @@ uint8_t CPU::PHA()
 
 uint8_t CPU::PHP()
 {
+    PS.flags.B = 1;
+    PS.flags.U = 1;
     PushByteToStack(PS.PS_byte);
 
     return 0;
@@ -603,6 +605,8 @@ uint8_t CPU::PLA()
 uint8_t CPU::PLP()
 {
     PS.PS_byte = PullByteFromStack();
+    PS.flags.B = 0;
+    PS.flags.U = 0;
 
     return 0;
 }
@@ -2151,6 +2155,41 @@ uint8_t CPU::SED()
 uint8_t CPU::SEI()
 {
     PS.flags.I = 1;
+
+    return 0;
+}
+
+uint8_t CPU::BRK()
+{
+    // Apparently BRK is in reality a two byte instruction
+    // but this byte just get discarded.
+    // We need to advance PC anyway.
+    ++PC;
+
+    PS.flags.B = 1;
+    PS.flags.U = 1;
+    PS.flags.I = 1;
+
+    PushWordToStack(PC);
+    PushByteToStack(PS.PS_byte);
+    PC = GetWordFromAddress(0xFFFE);
+
+    return 0;
+}
+
+uint8_t CPU::NOP()
+{
+    return 0;
+}
+
+uint8_t CPU::RTI()
+{
+    PS.PS_byte = PullByteFromStack();
+    PC = PullWordFromStack();
+
+    PS.flags.B = 0;
+    PS.flags.U = 0;
+    PS.flags.I = 0;
 
     return 0;
 }

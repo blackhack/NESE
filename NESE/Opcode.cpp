@@ -208,4 +208,8 @@ std::map<Opcode, OpcodeHandler> opcodesHandlers = {
     DEFINE_HANDLER(SEC,       2, &CPU::SEC),
     DEFINE_HANDLER(SED,       2, &CPU::SED),
     DEFINE_HANDLER(SEI,       2, &CPU::SEI),
+
+    DEFINE_HANDLER(BRK,       7, &CPU::BRK),
+    DEFINE_HANDLER(NOP,       2, &CPU::NOP),
+    DEFINE_HANDLER(RTI,       6, &CPU::RTI),
 };

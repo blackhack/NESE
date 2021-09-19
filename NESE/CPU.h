@@ -49,8 +49,8 @@ public:
             uint8_t Z : 1; // Zero Flag
             uint8_t I : 1; // Interrupt Disable
             uint8_t D : 1; // Decimal Mode
-            uint8_t B : 1; // Break Command
-            uint8_t : 1; // Unused
+            uint8_t B : 1; // Break Command | Those two flags do not exist in the actual cpu
+            uint8_t U:  1; // Unused        | but are used when flags are pushed onto stack
             uint8_t V : 1; // Overflow Flag
             uint8_t N : 1; // Negative Flag
         } flags;
@@ -253,6 +253,10 @@ public:
     uint8_t SEC();
     uint8_t SED();
     uint8_t SEI();
+
+    uint8_t BRK();
+    uint8_t NOP();
+    uint8_t RTI();
 
     Memory& memory;
     uint64_t cycle_period_ns;

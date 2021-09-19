@@ -28,7 +28,6 @@ class CPU;
 
 enum class Opcode : uint8_t
 {
-    NULL_OP = 0x00,
     LDA_IM = 0xA9,
     LDA_ZP = 0xA5,
     LDA_ZP_X = 0xB5,
@@ -206,6 +205,10 @@ enum class Opcode : uint8_t
     SEC = 0x38,
     SED = 0xF8,
     SEI = 0x78,
+
+    BRK = 0x00,
+    NOP = 0xEA,
+    RTI = 0x40,
 };
 
 typedef std::function<uint8_t(CPU*)> OpcodeCallback;
