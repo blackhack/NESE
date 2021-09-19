@@ -152,7 +152,6 @@ public:
     uint8_t BIT_ZP();
     uint8_t BIT_ABS();
 
-
     uint8_t ADC(uint8_t a, uint8_t b);
     uint8_t SBC(uint8_t a, uint8_t b);
 
@@ -206,6 +205,30 @@ public:
 
     uint8_t DEX();
     uint8_t DEY();
+
+    uint8_t ASL_ACC();
+    uint8_t ASL_ZP();
+    uint8_t ASL_ZP_X();
+    uint8_t ASL_ABS();
+    uint8_t ASL_ABS_X();
+
+    uint8_t LSR_ACC();
+    uint8_t LSR_ZP();
+    uint8_t LSR_ZP_X();
+    uint8_t LSR_ABS();
+    uint8_t LSR_ABS_X();
+
+    uint8_t ROL_ACC();
+    uint8_t ROL_ZP();
+    uint8_t ROL_ZP_X();
+    uint8_t ROL_ABS();
+    uint8_t ROL_ABS_X();
+
+    uint8_t ROR_ACC();
+    uint8_t ROR_ZP();
+    uint8_t ROR_ZP_X();
+    uint8_t ROR_ABS();
+    uint8_t ROR_ABS_X();
 
     Memory& memory;
     uint64_t cycle_period_ns;

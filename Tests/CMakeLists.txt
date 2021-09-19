@@ -34,6 +34,7 @@ add_executable(
   LogicalTest.cpp
   ArithmeticTest.cpp
   IncrementsDecrementsTest.cpp
+  ShiftsTest.cpp
 )
 target_link_libraries(
   UnitTesting

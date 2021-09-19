@@ -158,6 +158,30 @@ enum class Opcode : uint8_t
 
     DEX = 0xCA,
     DEY = 0x88,
+
+    ASL_ACC = 0x0A,
+    ASL_ZP = 0x06,
+    ASL_ZP_X = 0x16,
+    ASL_ABS = 0x0E,
+    ASL_ABS_X = 0x1E,
+
+    LSR_ACC = 0x4A,
+    LSR_ZP = 0x46,
+    LSR_ZP_X = 0x56,
+    LSR_ABS = 0x4E,
+    LSR_ABS_X = 0x5E,
+
+    ROL_ACC = 0x2A,
+    ROL_ZP = 0x26,
+    ROL_ZP_X = 0x36,
+    ROL_ABS = 0x2E,
+    ROL_ABS_X = 0x3E,
+
+    ROR_ACC = 0x6A,
+    ROR_ZP = 0x66,
+    ROR_ZP_X = 0x76,
+    ROR_ABS = 0x6E,
+    ROR_ABS_X = 0x7E,
 };
 
 typedef std::function<uint8_t(CPU*)> OpcodeCallback;
