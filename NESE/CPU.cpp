@@ -2105,3 +2105,52 @@ uint8_t CPU::BVS_REL()
 
     return extra_cycles;
 }
+
+uint8_t CPU::CLC()
+{
+    PS.flags.C = 0;
+
+    return 0;
+}
+
+uint8_t CPU::CLD()
+{
+    PS.flags.D = 0;
+
+    return 0;
+}
+
+uint8_t CPU::CLI()
+{
+    PS.flags.I = 0;
+
+    return 0;
+}
+
+uint8_t CPU::CLV()
+{
+    PS.flags.V = 0;
+
+    return 0;
+}
+
+uint8_t CPU::SEC()
+{
+    PS.flags.C = 1;
+
+    return 0;
+}
+
+uint8_t CPU::SED()
+{
+    PS.flags.D = 1;
+
+    return 0;
+}
+
+uint8_t CPU::SEI()
+{
+    PS.flags.I = 1;
+
+    return 0;
+}

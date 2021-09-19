@@ -198,6 +198,14 @@ enum class Opcode : uint8_t
     BPL_REL = 0x10,
     BVC_REL = 0x50,
     BVS_REL = 0x70,
+
+    CLC = 0x18,
+    CLD = 0xD8,
+    CLI = 0x58,
+    CLV = 0xB8,
+    SEC = 0x38,
+    SED = 0xF8,
+    SEI = 0x78,
 };
 
 typedef std::function<uint8_t(CPU*)> OpcodeCallback;

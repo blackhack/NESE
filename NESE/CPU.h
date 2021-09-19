@@ -246,6 +246,14 @@ public:
     uint8_t BVC_REL();
     uint8_t BVS_REL();
 
+    uint8_t CLC();
+    uint8_t CLD();
+    uint8_t CLI();
+    uint8_t CLV();
+    uint8_t SEC();
+    uint8_t SED();
+    uint8_t SEI();
+
     Memory& memory;
     uint64_t cycle_period_ns;
 };

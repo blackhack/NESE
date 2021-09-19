@@ -200,4 +200,12 @@ std::map<Opcode, OpcodeHandler> opcodesHandlers = {
     DEFINE_HANDLER(BPL_REL,   2, &CPU::BPL_REL),
     DEFINE_HANDLER(BVC_REL,   2, &CPU::BVC_REL),
     DEFINE_HANDLER(BVS_REL,   2, &CPU::BVS_REL),
+
+    DEFINE_HANDLER(CLC,       2, &CPU::CLC),
+    DEFINE_HANDLER(CLD,       2, &CPU::CLD),
+    DEFINE_HANDLER(CLI,       2, &CPU::CLI),
+    DEFINE_HANDLER(CLV,       2, &CPU::CLV),
+    DEFINE_HANDLER(SEC,       2, &CPU::SEC),
+    DEFINE_HANDLER(SED,       2, &CPU::SED),
+    DEFINE_HANDLER(SEI,       2, &CPU::SEI),
 };
