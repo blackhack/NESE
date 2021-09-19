@@ -237,6 +237,15 @@ public:
 
     uint8_t RTS();
 
+    uint8_t BCC_REL();
+    uint8_t BCS_REL();
+    uint8_t BEQ_REL();
+    uint8_t BMI_REL();
+    uint8_t BNE_REL();
+    uint8_t BPL_REL();
+    uint8_t BVC_REL();
+    uint8_t BVS_REL();
+
     Memory& memory;
     uint64_t cycle_period_ns;
 };

@@ -1961,3 +1961,147 @@ uint8_t CPU::RTS()
 
     return 0;
 }
+
+uint8_t CPU::BCC_REL()
+{
+    int8_t displacement = static_cast<int8_t>(GetByteFromPC());
+    uint8_t extra_cycles = 0;
+
+    if (PS.flags.C == 0)
+    {
+        uint16_t old_PC = PC;
+        PC += displacement;
+        ++extra_cycles;
+
+        if ((PC ^ old_PC) >> 8)
+            ++extra_cycles;
+    }
+
+    return extra_cycles;
+}
+
+uint8_t CPU::BCS_REL()
+{
+    int8_t displacement = static_cast<int8_t>(GetByteFromPC());
+    uint8_t extra_cycles = 0;
+
+    if (PS.flags.C == 1)
+    {
+        uint16_t old_PC = PC;
+        PC += displacement;
+        ++extra_cycles;
+
+        if ((PC ^ old_PC) >> 8)
+            ++extra_cycles;
+    }
+
+    return extra_cycles;
+}
+
+uint8_t CPU::BEQ_REL()
+{
+    int8_t displacement = static_cast<int8_t>(GetByteFromPC());
+    uint8_t extra_cycles = 0;
+
+    if (PS.flags.Z == 1)
+    {
+        uint16_t old_PC = PC;
+        PC += displacement;
+        ++extra_cycles;
+
+        if ((PC ^ old_PC) >> 8)
+            ++extra_cycles;
+    }
+
+    return extra_cycles;
+}
+
+uint8_t CPU::BMI_REL()
+{
+    int8_t displacement = static_cast<int8_t>(GetByteFromPC());
+    uint8_t extra_cycles = 0;
+
+    if (PS.flags.N == 1)
+    {
+        uint16_t old_PC = PC;
+        PC += displacement;
+        ++extra_cycles;
+
+        if ((PC ^ old_PC) >> 8)
+            ++extra_cycles;
+    }
+
+    return extra_cycles;
+}
+
+uint8_t CPU::BNE_REL()
+{
+    int8_t displacement = static_cast<int8_t>(GetByteFromPC());
+    uint8_t extra_cycles = 0;
+
+    if (PS.flags.Z == 0)
+    {
+        uint16_t old_PC = PC;
+        PC += displacement;
+        ++extra_cycles;
+
+        if ((PC ^ old_PC) >> 8)
+            ++extra_cycles;
+    }
+
+    return extra_cycles;
+}
+
+uint8_t CPU::BPL_REL()
+{
+    int8_t displacement = static_cast<int8_t>(GetByteFromPC());
+    uint8_t extra_cycles = 0;
+
+    if (PS.flags.N == 0)
+    {
+        uint16_t old_PC = PC;
+        PC += displacement;
+        ++extra_cycles;
+
+        if ((PC ^ old_PC) >> 8)
+            ++extra_cycles;
+    }
+
+    return extra_cycles;
+}
+
+uint8_t CPU::BVC_REL()
+{
+    int8_t displacement = static_cast<int8_t>(GetByteFromPC());
+    uint8_t extra_cycles = 0;
+
+    if (PS.flags.V == 0)
+    {
+        uint16_t old_PC = PC;
+        PC += displacement;
+        ++extra_cycles;
+
+        if ((PC ^ old_PC) >> 8)
+            ++extra_cycles;
+    }
+
+    return extra_cycles;
+}
+
+uint8_t CPU::BVS_REL()
+{
+    int8_t displacement = static_cast<int8_t>(GetByteFromPC());
+    uint8_t extra_cycles = 0;
+
+    if (PS.flags.V == 1)
+    {
+        uint16_t old_PC = PC;
+        PC += displacement;
+        ++extra_cycles;
+
+        if ((PC ^ old_PC) >> 8)
+            ++extra_cycles;
+    }
+
+    return extra_cycles;
+}

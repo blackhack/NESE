@@ -36,6 +36,7 @@ add_executable(
   IncrementsDecrementsTest.cpp
   ShiftsTest.cpp
   JumpsCallsTest.cpp
+  BranchesTest.cpp
 )
 target_link_libraries(
   UnitTesting

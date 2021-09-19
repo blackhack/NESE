@@ -189,6 +189,15 @@ enum class Opcode : uint8_t
     JSR_ABS = 0x20,
 
     RTS = 0x60,
+
+    BCC_REL = 0x90,
+    BCS_REL = 0xB0,
+    BEQ_REL = 0xF0,
+    BMI_REL = 0x30,
+    BNE_REL = 0xD0,
+    BPL_REL = 0x10,
+    BVC_REL = 0x50,
+    BVS_REL = 0x70,
 };
 
 typedef std::function<uint8_t(CPU*)> OpcodeCallback;
