@@ -107,6 +107,41 @@ enum class Opcode : uint8_t
 
     BIT_ZP = 0x24,
     BIT_ABS = 0x2C,
+
+    ADC_IM = 0x69,
+    ADC_ZP = 0x65,
+    ADC_ZP_X = 0x75,
+    ADC_ABS = 0x6D,
+    ADC_ABS_X = 0x7D,
+    ADC_ABS_Y = 0x79,
+    ADC_IND_X = 0x61,
+    ADC_IND_Y = 0x71,
+
+    SBC_IM = 0xE9,
+    SBC_ZP = 0xE5,
+    SBC_ZP_X = 0xF5,
+    SBC_ABS = 0xED,
+    SBC_ABS_X = 0xFD,
+    SBC_ABS_Y = 0xF9,
+    SBC_IND_X = 0xE1,
+    SBC_IND_Y = 0xF1,
+
+    CMP_IM = 0xC9,
+    CMP_ZP = 0xC5,
+    CMP_ZP_X = 0xD5,
+    CMP_ABS = 0xCD,
+    CMP_ABS_X = 0xDD,
+    CMP_ABS_Y = 0xD9,
+    CMP_IND_X = 0xC1,
+    CMP_IND_Y = 0xD1,
+
+    CPX_IM = 0xE0,
+    CPX_ZP = 0xE4,
+    CPX_ABS = 0xEC,
+
+    CPY_IM = 0xC0,
+    CPY_ZP = 0xC4,
+    CPY_ABS = 0xCC,
 };
 
 typedef std::function<uint8_t(CPU*)> OpcodeCallback;

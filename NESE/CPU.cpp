@@ -176,8 +176,8 @@ uint8_t CPU::LDA_IM()
 
 uint8_t CPU::LDA_ZP()
 {
-    uint16_t address = GetByteFromPC();
-    A = GetByteFromAddress(address);
+    uint16_t ZP_address = GetByteFromPC();
+    A = GetByteFromAddress(ZP_address);
     PS.flags.Z = (A == 0 ? 1 : 0);
     PS.flags.N = checkBit(A, 7);
 
@@ -290,9 +290,9 @@ uint8_t CPU::LDX_IM()
 
 uint8_t CPU::LDX_ZP()
 {
-    uint16_t address = GetByteFromPC();
+    uint16_t ZP_address = GetByteFromPC();
 
-    X = GetByteFromAddress(address);
+    X = GetByteFromAddress(ZP_address);
     PS.flags.Z = (X == 0 ? 1 : 0);
     PS.flags.N = checkBit(X, 7);
 
@@ -352,9 +352,9 @@ uint8_t CPU::LDY_IM()
 
 uint8_t CPU::LDY_ZP()
 {
-    uint16_t address = GetByteFromPC();
+    uint16_t ZP_address = GetByteFromPC();
 
-    Y = GetByteFromAddress(address);
+    Y = GetByteFromAddress(ZP_address);
     PS.flags.Z = (Y == 0 ? 1 : 0);
     PS.flags.N = checkBit(Y, 7);
 
@@ -618,8 +618,8 @@ uint8_t CPU::AND_IM()
 
 uint8_t CPU::AND_ZP()
 {
-    uint16_t address = GetByteFromPC();
-    A &= GetByteFromAddress(address);
+    uint16_t ZP_address = GetByteFromPC();
+    A &= GetByteFromAddress(ZP_address);
     PS.flags.Z = (A == 0 ? 1 : 0);
     PS.flags.N = checkBit(A, 7);
 
@@ -730,8 +730,8 @@ uint8_t CPU::EOR_IM()
 
 uint8_t CPU::EOR_ZP()
 {
-    uint16_t address = GetByteFromPC();
-    A ^= GetByteFromAddress(address);
+    uint16_t ZP_address = GetByteFromPC();
+    A ^= GetByteFromAddress(ZP_address);
     PS.flags.Z = (A == 0 ? 1 : 0);
     PS.flags.N = checkBit(A, 7);
 
@@ -842,8 +842,8 @@ uint8_t CPU::ORA_IM()
 
 uint8_t CPU::ORA_ZP()
 {
-    uint16_t address = GetByteFromPC();
-    A |= GetByteFromAddress(address);
+    uint16_t ZP_address = GetByteFromPC();
+    A |= GetByteFromAddress(ZP_address);
     PS.flags.Z = (A == 0 ? 1 : 0);
     PS.flags.N = checkBit(A, 7);
 
@@ -945,8 +945,8 @@ uint8_t CPU::ORA_IND_Y()
 
 uint8_t CPU::BIT_ZP()
 {
-    uint16_t address = GetByteFromPC();
-    uint8_t data = GetByteFromAddress(address);
+    uint16_t ZP_address = GetByteFromPC();
+    uint8_t data = GetByteFromAddress(ZP_address);
     uint8_t result = A & data;
     PS.flags.Z = (result == 0 ? 1 : 0);
     PS.flags.V = checkBit(data, 6);
@@ -964,6 +964,447 @@ uint8_t CPU::BIT_ABS()
     PS.flags.Z = (result == 0 ? 1 : 0);
     PS.flags.V = checkBit(data, 6);
     PS.flags.N = checkBit(data, 7);
+
+    return 0;
+}
+
+uint8_t CPU::ADC(uint8_t a, uint8_t b)
+{
+    uint16_t total = a + b + PS.flags.C;
+    uint8_t result = total & 0xFF;
+    bool same_sign_before = checkBit(~(a ^ b), 7);
+    bool same_sign_after = checkBit(~(result ^ b), 7);
+
+    PS.flags.C = total > 0xFF;
+    PS.flags.V = (same_sign_before && !same_sign_after);
+
+    return result;
+}
+
+uint8_t CPU::SBC(uint8_t a, uint8_t b)
+{
+    return ADC(a, ~b);
+}
+
+uint8_t CPU::ADC_IM()
+{
+    A = ADC(A, GetByteFromPC());
+
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return 0;
+}
+
+uint8_t CPU::ADC_ZP()
+{
+    uint16_t ZP_address = GetByteFromPC();
+    A = ADC(A, GetByteFromAddress(ZP_address));
+
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return 0;
+}
+
+uint8_t CPU::ADC_ZP_X()
+{
+    uint16_t ZP_address = GetByteFromPC();
+
+    ZP_address += X;
+    ZP_address &= 0xFF;// This address require a truncation to 8 bits (zero page address)
+
+    A = ADC(A, GetByteFromAddress(ZP_address));
+
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return 0;
+}
+
+uint8_t CPU::ADC_ABS()
+{
+    uint16_t address = GetWordFromPC();
+    A = ADC(A, GetByteFromAddress(address));
+
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return 0;
+}
+
+uint8_t CPU::ADC_ABS_X()
+{
+    bool page_crossed = false;
+
+    uint16_t base_address = GetWordFromPC();
+    uint16_t final_address = base_address + X;
+
+    if ((final_address ^ base_address) >> 8)
+        page_crossed = true;
+
+    A = ADC(A, GetByteFromAddress(final_address));
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return (page_crossed ? 1 : 0);
+}
+
+uint8_t CPU::ADC_ABS_Y()
+{
+    bool page_crossed = false;
+
+    uint16_t base_address = GetWordFromPC();
+    uint16_t final_address = base_address + Y;
+
+    if ((final_address ^ base_address) >> 8)
+        page_crossed = true;
+
+    A = ADC(A, GetByteFromAddress(final_address));
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return (page_crossed ? 1 : 0);
+}
+
+uint8_t CPU::ADC_IND_X()
+{
+    uint16_t ZP_address = GetByteFromPC();
+
+    ZP_address += X;
+    ZP_address &= 0xFF; // This address require a truncation to 8 bits (zero page address)
+
+    uint16_t final_address = GetWordFromAddress(ZP_address);
+
+    A = ADC(A, GetByteFromAddress(final_address));
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return 0;
+}
+
+uint8_t CPU::ADC_IND_Y()
+{
+    bool page_crossed = false;;
+
+    uint16_t ZP_address = GetByteFromPC();
+    uint16_t base_address = GetWordFromAddress(ZP_address);
+
+    uint16_t final_address = base_address + Y;
+    if ((final_address ^ base_address) >> 8)
+        page_crossed = true;
+
+    A = ADC(A, GetByteFromAddress(final_address));
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return (page_crossed ? 1 : 0);
+}
+
+uint8_t CPU::SBC_IM()
+{
+    A = SBC(A, GetByteFromPC());
+
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return 0;
+}
+
+uint8_t CPU::SBC_ZP()
+{
+    uint16_t ZP_address = GetByteFromPC();
+    A = SBC(A, GetByteFromAddress(ZP_address));
+
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return 0;
+}
+
+uint8_t CPU::SBC_ZP_X()
+{
+    uint16_t ZP_address = GetByteFromPC();
+
+    ZP_address += X;
+    ZP_address &= 0xFF;// This address require a truncation to 8 bits (zero page address)
+
+    A = SBC(A, GetByteFromAddress(ZP_address));
+
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return 0;
+}
+
+uint8_t CPU::SBC_ABS()
+{
+    uint16_t address = GetWordFromPC();
+    A = SBC(A, GetByteFromAddress(address));
+
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return 0;
+}
+
+uint8_t CPU::SBC_ABS_X()
+{
+    bool page_crossed = false;
+
+    uint16_t base_address = GetWordFromPC();
+    uint16_t final_address = base_address + X;
+
+    if ((final_address ^ base_address) >> 8)
+        page_crossed = true;
+
+    A = SBC(A, GetByteFromAddress(final_address));
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return (page_crossed ? 1 : 0);
+}
+
+uint8_t CPU::SBC_ABS_Y()
+{
+    bool page_crossed = false;
+
+    uint16_t base_address = GetWordFromPC();
+    uint16_t final_address = base_address + Y;
+
+    if ((final_address ^ base_address) >> 8)
+        page_crossed = true;
+
+    A = SBC(A, GetByteFromAddress(final_address));
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return (page_crossed ? 1 : 0);
+}
+
+uint8_t CPU::SBC_IND_X()
+{
+    uint16_t ZP_address = GetByteFromPC();
+
+    ZP_address += X;
+    ZP_address &= 0xFF; // This address require a truncation to 8 bits (zero page address)
+
+    uint16_t final_address = GetWordFromAddress(ZP_address);
+
+    A = SBC(A, GetByteFromAddress(final_address));
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return 0;
+}
+
+uint8_t CPU::SBC_IND_Y()
+{
+    bool page_crossed = false;;
+
+    uint16_t ZP_address = GetByteFromPC();
+    uint16_t base_address = GetWordFromAddress(ZP_address);
+
+    uint16_t final_address = base_address + Y;
+    if ((final_address ^ base_address) >> 8)
+        page_crossed = true;
+
+    A = SBC(A, GetByteFromAddress(final_address));
+    PS.flags.Z = (A == 0 ? 1 : 0);
+    PS.flags.N = checkBit(A, 7);
+
+    return (page_crossed ? 1 : 0);
+}
+
+uint8_t CPU::CMP_IM()
+{
+    uint8_t data = GetByteFromPC();
+
+    PS.flags.C = (A >= data ? 1 : 0);
+    PS.flags.Z = (A == data ? 1 : 0);
+    PS.flags.N = checkBit((A - data), 7);
+
+    return 0;
+}
+
+uint8_t CPU::CMP_ZP()
+{
+    uint16_t ZP_address = GetByteFromPC();
+    uint8_t data = GetByteFromAddress(ZP_address);
+
+    PS.flags.C = (A >= data ? 1 : 0);
+    PS.flags.Z = (A == data ? 1 : 0);
+    PS.flags.N = checkBit((A - data), 7);
+
+    return 0;
+}
+
+uint8_t CPU::CMP_ZP_X()
+{
+    uint16_t ZP_address = GetByteFromPC();
+
+    ZP_address += X;
+    ZP_address &= 0xFF;// This address require a truncation to 8 bits (zero page address)
+
+    uint8_t data = GetByteFromAddress(ZP_address);
+
+    PS.flags.C = (A >= data ? 1 : 0);
+    PS.flags.Z = (A == data ? 1 : 0);
+    PS.flags.N = checkBit((A - data), 7);
+
+    return 0;
+}
+
+uint8_t CPU::CMP_ABS()
+{
+    uint16_t address = GetWordFromPC();
+    uint8_t data = GetByteFromAddress(address);
+
+    PS.flags.C = (A >= data ? 1 : 0);
+    PS.flags.Z = (A == data ? 1 : 0);
+    PS.flags.N = checkBit((A - data), 7);
+
+    return 0;
+}
+
+uint8_t CPU::CMP_ABS_X()
+{
+    bool page_crossed = false;
+
+    uint16_t base_address = GetWordFromPC();
+    uint16_t final_address = base_address + X;
+
+    if ((final_address ^ base_address) >> 8)
+        page_crossed = true;
+
+    uint8_t data = GetByteFromAddress(final_address);
+    PS.flags.C = (A >= data ? 1 : 0);
+    PS.flags.Z = (A == data ? 1 : 0);
+    PS.flags.N = checkBit((A - data), 7);
+
+    return (page_crossed ? 1 : 0);
+}
+
+uint8_t CPU::CMP_ABS_Y()
+{
+    bool page_crossed = false;
+
+    uint16_t base_address = GetWordFromPC();
+    uint16_t final_address = base_address + Y;
+
+    if ((final_address ^ base_address) >> 8)
+        page_crossed = true;
+
+    uint8_t data = GetByteFromAddress(final_address);
+    PS.flags.C = (A >= data ? 1 : 0);
+    PS.flags.Z = (A == data ? 1 : 0);
+    PS.flags.N = checkBit((A - data), 7);
+
+    return (page_crossed ? 1 : 0);
+}
+
+uint8_t CPU::CMP_IND_X()
+{
+    uint16_t ZP_address = GetByteFromPC();
+
+    ZP_address += X;
+    ZP_address &= 0xFF; // This address require a truncation to 8 bits (zero page address)
+
+    uint16_t final_address = GetWordFromAddress(ZP_address);
+
+    uint8_t data = GetByteFromAddress(final_address);
+    PS.flags.C = (A >= data ? 1 : 0);
+    PS.flags.Z = (A == data ? 1 : 0);
+    PS.flags.N = checkBit((A - data), 7);
+
+    return 0;
+}
+
+uint8_t CPU::CMP_IND_Y()
+{
+    bool page_crossed = false;;
+
+    uint16_t ZP_address = GetByteFromPC();
+    uint16_t base_address = GetWordFromAddress(ZP_address);
+
+    uint16_t final_address = base_address + Y;
+    if ((final_address ^ base_address) >> 8)
+        page_crossed = true;
+
+    uint8_t data = GetByteFromAddress(final_address);
+    PS.flags.C = (A >= data ? 1 : 0);
+    PS.flags.Z = (A == data ? 1 : 0);
+    PS.flags.N = checkBit((A - data), 7);
+
+    return (page_crossed ? 1 : 0);
+}
+
+uint8_t CPU::CPX_IM()
+{
+    uint8_t data = GetByteFromPC();
+
+    PS.flags.C = (X >= data ? 1 : 0);
+    PS.flags.Z = (X== data ? 1 : 0);
+    PS.flags.N = checkBit((X - data), 7);
+
+    return 0;
+}
+
+uint8_t CPU::CPX_ZP()
+{
+    uint16_t ZP_address = GetByteFromPC();
+    uint8_t data = GetByteFromAddress(ZP_address);
+
+    PS.flags.C = (X >= data ? 1 : 0);
+    PS.flags.Z = (X == data ? 1 : 0);
+    PS.flags.N = checkBit((X - data), 7);
+
+    return 0;
+}
+
+uint8_t CPU::CPX_ABS()
+{
+    uint16_t address = GetWordFromPC();
+    uint8_t data = GetByteFromAddress(address);
+
+    PS.flags.C = (X >= data ? 1 : 0);
+    PS.flags.Z = (X == data ? 1 : 0);
+    PS.flags.N = checkBit((X - data), 7);
+
+    return 0;
+}
+
+uint8_t CPU::CPY_IM()
+{
+    uint8_t data = GetByteFromPC();
+
+    PS.flags.C = (Y >= data ? 1 : 0);
+    PS.flags.Z = (Y == data ? 1 : 0);
+    PS.flags.N = checkBit((Y - data), 7);
+
+    return 0;
+}
+
+uint8_t CPU::CPY_ZP()
+{
+    uint16_t ZP_address = GetByteFromPC();
+    uint8_t data = GetByteFromAddress(ZP_address);
+
+    PS.flags.C = (Y >= data ? 1 : 0);
+    PS.flags.Z = (Y == data ? 1 : 0);
+    PS.flags.N = checkBit((Y - data), 7);
+
+    return 0;
+}
+
+uint8_t CPU::CPY_ABS()
+{
+    uint16_t address = GetWordFromPC();
+    uint8_t data = GetByteFromAddress(address);
+
+    PS.flags.C = (Y >= data ? 1 : 0);
+    PS.flags.Z = (Y == data ? 1 : 0);
+    PS.flags.N = checkBit((Y - data), 7);
 
     return 0;
 }

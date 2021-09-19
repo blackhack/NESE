@@ -32,6 +32,7 @@ add_executable(
   RegisterTransfersTest.cpp
   StackOperationsTest.cpp
   LogicalTest.cpp
+  ArithmeticTest.cpp
 )
 target_link_libraries(
   UnitTesting
