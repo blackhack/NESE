@@ -1408,3 +1408,159 @@ uint8_t CPU::CPY_ABS()
 
     return 0;
 }
+
+uint8_t CPU::INC_ZP()
+{
+    uint16_t ZP_address = GetByteFromPC();
+    uint8_t data = GetByteFromAddress(ZP_address) + 1;
+    SetByte(ZP_address, data);
+
+    PS.flags.Z = (data == 0 ? 1 : 0);
+    PS.flags.N = checkBit(data, 7);
+
+    return 0;
+}
+
+uint8_t CPU::INC_ZP_X()
+{
+    uint16_t ZP_address = GetByteFromPC();
+
+    ZP_address += X;
+    ZP_address &= 0xFF;
+
+    uint8_t data = GetByteFromAddress(ZP_address) + 1;
+    SetByte(ZP_address, data);
+
+    PS.flags.Z = (data == 0 ? 1 : 0);
+    PS.flags.N = checkBit(data, 7);
+
+    return 0;
+}
+
+uint8_t CPU::INC_ABS()
+{
+    uint16_t address = GetWordFromPC();
+
+    uint8_t data = GetByteFromAddress(address) + 1;
+    SetByte(address, data);
+
+    PS.flags.Z = (data == 0 ? 1 : 0);
+    PS.flags.N = checkBit(data, 7);
+
+    return 0;
+}
+
+uint8_t CPU::INC_ABS_X()
+{
+    bool page_crossed = false;
+
+    uint16_t base_address = GetWordFromPC();
+    uint16_t final_address = base_address + X;
+
+    if ((final_address ^ base_address) >> 8)
+        page_crossed = true;
+
+    uint8_t data = GetByteFromAddress(final_address) + 1;
+    SetByte(final_address, data);
+
+    PS.flags.Z = (data == 0 ? 1 : 0);
+    PS.flags.N = checkBit(data, 7);
+
+    return (page_crossed ? 1 : 0);
+}
+
+uint8_t CPU::INX()
+{
+    ++X;
+    PS.flags.Z = (X == 0 ? 1 : 0);
+    PS.flags.N = checkBit(X, 7);
+
+    return 0;
+}
+
+uint8_t CPU::INY()
+{
+    ++Y;
+    PS.flags.Z = (Y == 0 ? 1 : 0);
+    PS.flags.N = checkBit(Y, 7);
+
+    return 0;
+}
+
+uint8_t CPU::DEC_ZP()
+{
+    uint16_t ZP_address = GetByteFromPC();
+    uint8_t data = GetByteFromAddress(ZP_address) - 1;
+    SetByte(ZP_address, data);
+
+    PS.flags.Z = (data == 0 ? 1 : 0);
+    PS.flags.N = checkBit(data, 7);
+
+    return 0;
+}
+
+uint8_t CPU::DEC_ZP_X()
+{
+    uint16_t ZP_address = GetByteFromPC();
+
+    ZP_address += X;
+    ZP_address &= 0xFF;
+
+    uint8_t data = GetByteFromAddress(ZP_address) - 1;
+    SetByte(ZP_address, data);
+
+    PS.flags.Z = (data == 0 ? 1 : 0);
+    PS.flags.N = checkBit(data, 7);
+
+    return 0;
+}
+
+uint8_t CPU::DEC_ABS()
+{
+    uint16_t address = GetWordFromPC();
+
+    uint8_t data = GetByteFromAddress(address) - 1;
+    SetByte(address, data);
+
+    PS.flags.Z = (data == 0 ? 1 : 0);
+    PS.flags.N = checkBit(data, 7);
+
+    return 0;
+}
+
+uint8_t CPU::DEC_ABS_X()
+{
+    bool page_crossed = false;
+
+    uint16_t base_address = GetWordFromPC();
+    uint16_t final_address = base_address + X;
+
+    if ((final_address ^ base_address) >> 8)
+        page_crossed = true;
+
+    uint8_t data = GetByteFromAddress(final_address) - 1;
+    SetByte(final_address, data);
+
+    PS.flags.Z = (data == 0 ? 1 : 0);
+    PS.flags.N = checkBit(data, 7);
+
+    return (page_crossed ? 1 : 0);
+}
+
+uint8_t CPU::DEX()
+{
+    --X;
+    PS.flags.Z = (X == 0 ? 1 : 0);
+    PS.flags.N = checkBit(X, 7);
+
+    return 0;
+}
+
+uint8_t CPU::DEY()
+{
+    --Y;
+    PS.flags.Z = (Y == 0 ? 1 : 0);
+    PS.flags.N = checkBit(Y, 7);
+
+    return 0;
+}

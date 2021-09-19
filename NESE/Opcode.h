@@ -142,6 +142,22 @@ enum class Opcode : uint8_t
     CPY_IM = 0xC0,
     CPY_ZP = 0xC4,
     CPY_ABS = 0xCC,
+
+    INC_ZP = 0xE6,
+    INC_ZP_X = 0xF6,
+    INC_ABS = 0xEE,
+    INC_ABS_X = 0xFE,
+
+    INX = 0xE8,
+    INY = 0xC8,
+
+    DEC_ZP = 0xC6,
+    DEC_ZP_X = 0xD6,
+    DEC_ABS = 0xCE,
+    DEC_ABS_X = 0xDE,
+
+    DEX = 0xCA,
+    DEY = 0x88,
 };
 
 typedef std::function<uint8_t(CPU*)> OpcodeCallback;

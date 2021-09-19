@@ -191,6 +191,22 @@ public:
     uint8_t CPY_ZP();
     uint8_t CPY_ABS();
 
+    uint8_t INC_ZP();
+    uint8_t INC_ZP_X();
+    uint8_t INC_ABS();
+    uint8_t INC_ABS_X();
+
+    uint8_t INX();
+    uint8_t INY();
+
+    uint8_t DEC_ZP();
+    uint8_t DEC_ZP_X();
+    uint8_t DEC_ABS();
+    uint8_t DEC_ABS_X();
+
+    uint8_t DEX();
+    uint8_t DEY();
+
     Memory& memory;
     uint64_t cycle_period_ns;
 };

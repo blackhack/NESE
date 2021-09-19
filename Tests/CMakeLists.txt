@@ -33,6 +33,7 @@ add_executable(
   StackOperationsTest.cpp
   LogicalTest.cpp
   ArithmeticTest.cpp
+  IncrementsDecrementsTest.cpp
 )
 target_link_libraries(
   UnitTesting
