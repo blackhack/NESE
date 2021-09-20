@@ -23,7 +23,7 @@
 
 TEST(ArithmeticTest, ADC_ABS) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     cpu.PS.flags.C = 0;
     cpu.A = 127;
@@ -47,7 +47,7 @@ TEST(ArithmeticTest, ADC_ABS) {
 
 TEST(ArithmeticTest, SBC_ABS) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     cpu.PS.flags.C = 1;
     cpu.A = 127;
@@ -71,7 +71,7 @@ TEST(ArithmeticTest, SBC_ABS) {
 
 TEST(ArithmeticTest, CMP_IM) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     cpu.PS.flags.C = 0;
     cpu.A = 127;
@@ -91,7 +91,7 @@ TEST(ArithmeticTest, CMP_IM) {
 
 TEST(ArithmeticTest, CPX_ZP) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     cpu.PS.flags.C = 1;
     cpu.X = 0;
@@ -112,7 +112,7 @@ TEST(ArithmeticTest, CPX_ZP) {
 
 TEST(ArithmeticTest, CPY_ZP) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     cpu.PS.flags.C = 0;
     cpu.Y = 105;

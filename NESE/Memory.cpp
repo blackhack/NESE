@@ -17,6 +17,10 @@
 */
 
 #include "Memory.h"
+#include <algorithm>
+#include <fstream>
+#include <sstream>
+#include <vector>
 
 Memory::Memory()
 {
@@ -31,4 +35,36 @@ const uint8_t Memory::operator[](uint16_t address) const
 uint8_t& Memory::operator[](uint16_t address)
 {
     return _data.at(address);
+}
+
+bool Memory::LoadFile(std::string filepath)
+{
+    std::ifstream fileStream;
+    fileStream.open(filepath, std::ios::binary | std::ios::ate);
+    std::streamoff fileSize = fileStream.tellg();
+    fileStream.seekg(0, std::ios::beg);
+
+    if (!fileStream.is_open())
+    {
+        std::cerr << "Cant open the file\n";
+        return false;
+    }
+
+    if (fileSize > MAX_MEMORY)
+    {
+        std::cerr << "The rom is too big: " << fileSize << " bytes (Maximum: 65536)\n";
+        return false;
+    }
+
+    std::vector<uint8_t> buffer(std::istreambuf_iterator<char>(fileStream), {});
+
+    for (uint32_t i = 0; i < buffer.size(); ++i)
+    {
+        uint8_t value = buffer[i];
+        _data[0x0000000A + i] = value;
+    }
+
+    std::cout << "ROM loaded!, Size: " << fileSize << " bytes" << std::endl;
+
+    return true;
 }

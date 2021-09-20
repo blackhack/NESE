@@ -22,7 +22,7 @@
 
 TEST(LoadStoreTest, LDA_FlagsTest) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::LDA_IM);
     mem[1] = 0x00; // Random value for the opcode
@@ -45,7 +45,7 @@ TEST(LoadStoreTest, LDA_FlagsTest) {
 
 TEST(LoadStoreTest, LDA_IM) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::LDA_IM);
     mem[1] = 0x31; // Random value for the opcode
@@ -58,7 +58,7 @@ TEST(LoadStoreTest, LDA_IM) {
 
 TEST(LoadStoreTest, LDA_ZP) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::LDA_ZP);
     mem[1] = 0xF3; // Random address for the opcode
@@ -71,7 +71,7 @@ TEST(LoadStoreTest, LDA_ZP) {
 
 TEST(LoadStoreTest, LDA_ZP_X) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::LDA_ZP_X);
     mem[1] = 0x80; // Random address for the opcode
@@ -94,7 +94,7 @@ TEST(LoadStoreTest, LDA_ZP_X) {
 
 TEST(LoadStoreTest, LDA_ABS) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::LDA_ABS);
     mem[1] = 0x2F;
@@ -108,7 +108,7 @@ TEST(LoadStoreTest, LDA_ABS) {
 
 TEST(LoadStoreTest, LDA_ABS_X) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::LDA_ABS_X);
     mem[1] = 0xCC;
@@ -137,7 +137,7 @@ TEST(LoadStoreTest, LDA_ABS_X) {
 
 TEST(LoadStoreTest, LDA_ABS_Y) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::LDA_ABS_Y);
     mem[1] = 0xCC;
@@ -166,7 +166,7 @@ TEST(LoadStoreTest, LDA_ABS_Y) {
 
 TEST(LoadStoreTest, LDA_IND_X) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::LDA_IND_X);
     mem[1] = 0x3E;
@@ -182,7 +182,7 @@ TEST(LoadStoreTest, LDA_IND_X) {
 
 TEST(LoadStoreTest, LDA_IND_Y) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::LDA_IND_Y);
     mem[1] = 0x4C;
@@ -209,7 +209,7 @@ TEST(LoadStoreTest, LDA_IND_Y) {
 
 TEST(LoadStoreTest, LDX_ZP_Y) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::LDX_ZP_Y);
     mem[1] = 0x80;
@@ -232,7 +232,7 @@ TEST(LoadStoreTest, LDX_ZP_Y) {
 
 TEST(LoadStoreTest, LDY_ABS_X) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::LDY_ABS_X);
     mem[1] = 0xCC;
@@ -261,7 +261,7 @@ TEST(LoadStoreTest, LDY_ABS_X) {
 
 TEST(LoadStoreTest, STA_IND_Y) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::STA_IND_Y);
     mem[1] = 0x4C;
@@ -277,7 +277,7 @@ TEST(LoadStoreTest, STA_IND_Y) {
 
 TEST(LoadStoreTest, STX_ZP) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::STX_ZP);
     mem[1] = 0xF3;
@@ -290,7 +290,7 @@ TEST(LoadStoreTest, STX_ZP) {
 
 TEST(LoadStoreTest, STY_ABS) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::STY_ABS);
     mem[1] = 0x2F;

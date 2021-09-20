@@ -22,7 +22,7 @@
 
 TEST(LogicalTest, AND_ZP_X) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::AND_ZP_X);
     mem[1] = 0x80;
@@ -47,7 +47,7 @@ TEST(LogicalTest, AND_ZP_X) {
 
 TEST(LogicalTest, EOR_ABS_Y) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::EOR_ABS_Y);
     mem[1] = 0xCC;
@@ -78,7 +78,7 @@ TEST(LogicalTest, EOR_ABS_Y) {
 
 TEST(LogicalTest, ORA_IND_X) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::ORA_IND_X);
     mem[1] = 0x3E;
@@ -95,7 +95,7 @@ TEST(LogicalTest, ORA_IND_X) {
 
 TEST(LogicalTest, BIT_ABS) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::BIT_ABS);
     mem[1] = 0x15;

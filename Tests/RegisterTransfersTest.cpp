@@ -22,7 +22,7 @@
 
 TEST(RegisterTransferTest, TAX) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::TAX);
     cpu.A = 0x21;
@@ -34,7 +34,7 @@ TEST(RegisterTransferTest, TAX) {
 
 TEST(RegisterTransferTest, TAY) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::TAY);
     cpu.Y = 0x22;
@@ -46,7 +46,7 @@ TEST(RegisterTransferTest, TAY) {
 
 TEST(RegisterTransferTest, TXA) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::TXA);
     cpu.X = 0xCF;
@@ -58,7 +58,7 @@ TEST(RegisterTransferTest, TXA) {
 
 TEST(RegisterTransferTest, TYA) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::TYA);
     cpu.Y = 0xFF;

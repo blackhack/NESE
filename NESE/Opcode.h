@@ -49,7 +49,7 @@ enum class Opcode : uint8_t
     LDY_ABS = 0xAC,
     LDY_ABS_X = 0xBC,
 
-    STA_ZP = 0x82,
+    STA_ZP = 0x85,
     STA_ZP_X = 0x95,
     STA_ABS = 0x8D,
     STA_ABS_X = 0x9D,

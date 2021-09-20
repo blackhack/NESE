@@ -22,7 +22,7 @@
 
 TEST(StatusFlagChanges, CLC) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     cpu.PS.flags.C = 1;
     mem[0] = static_cast<uint8_t>(Opcode::CLC);
@@ -34,7 +34,7 @@ TEST(StatusFlagChanges, CLC) {
 
 TEST(StatusFlagChanges, SEC) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     cpu.PS.flags.C = 0;
     mem[0] = static_cast<uint8_t>(Opcode::SEC);

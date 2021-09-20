@@ -22,7 +22,7 @@
 
 TEST(ShiftsTest, ASL_ACC) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::ASL_ACC);
     cpu.A = 0b10000001;
@@ -36,7 +36,7 @@ TEST(ShiftsTest, ASL_ACC) {
 
 TEST(ShiftsTest, LSR_ZP) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::LSR_ZP);
     mem[1] = 0x15;
@@ -51,7 +51,7 @@ TEST(ShiftsTest, LSR_ZP) {
 
 TEST(ShiftsTest, ROL_ABS) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::ROL_ABS);
     mem[1] = 0x15;
@@ -67,7 +67,7 @@ TEST(ShiftsTest, ROL_ABS) {
 
 TEST(ShiftsTest, ROR_ABS) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::ROR_ABS);
     mem[1] = 0x15;

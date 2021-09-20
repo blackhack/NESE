@@ -22,7 +22,7 @@
 
 TEST(JumpsCallsTest, JMP_ABS) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::JMP_ABS);
     mem[1] = 0xFC;
@@ -35,7 +35,7 @@ TEST(JumpsCallsTest, JMP_ABS) {
 
 TEST(JumpsCallsTest, JMP_IND) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::JMP_IND);
     mem[1] = 0xED;
@@ -50,7 +50,7 @@ TEST(JumpsCallsTest, JMP_IND) {
 
 TEST(JumpsCallsTest, JSR_RTS) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::JSR_ABS);
     mem[1] = 0x21;

@@ -21,6 +21,7 @@
 
 #include <cstdint>
 #include <array>
+#include <iostream>
 
 constexpr uint32_t MAX_MEMORY = 1024*64;
 
@@ -32,6 +33,7 @@ public:
     const uint8_t operator[](uint16_t address) const;
     uint8_t& operator[](uint16_t address);
 
+    bool LoadFile(std::string filepath);
 private:
     std::array<uint8_t, MAX_MEMORY> _data;
 };

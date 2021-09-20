@@ -22,7 +22,7 @@
 
 TEST(IncrementsDecrementsTest, INC_ZP_X) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::INC_ZP_X);
     mem[1] = 0x80;
@@ -43,7 +43,7 @@ TEST(IncrementsDecrementsTest, INC_ZP_X) {
 
 TEST(IncrementsDecrementsTest, DEC_ABS_X) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::DEC_ABS_X);
     mem[1] = 0xCC;
@@ -68,7 +68,7 @@ TEST(IncrementsDecrementsTest, DEC_ABS_X) {
 
 TEST(IncrementsDecrementsTest, INX_DEX) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::INX);
     mem[1] = static_cast<uint8_t>(Opcode::DEX);
@@ -85,7 +85,7 @@ TEST(IncrementsDecrementsTest, INX_DEX) {
 
 TEST(IncrementsDecrementsTest, INY_DEY) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::INY);
     mem[1] = static_cast<uint8_t>(Opcode::DEY);

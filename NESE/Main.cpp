@@ -23,20 +23,10 @@
 int main()
 {
     Memory ram;
-    CPU cpu(ram, 1790000);
-
-    ram[0] = static_cast<uint8_t>(Opcode::LDA_IM); // Opcode::LDA_IMM
-    ram[1] = 0x31; // Random value for the opcode
-    ram[2] = static_cast<uint8_t>(Opcode::LDA_ZP); // Opcode::LDA_ZP
-    ram[3] = 0xF3; // Random address for the opcode
-    ram[0xF3] = 0x84; // Random value for the opcode on the random address
-
-    cpu.Reset();
-
-    cpu.Execute(1);
-    std::cout << std::hex << (int)cpu.A << std::endl;
-    cpu.Execute(1);
-    std::cout << std::hex << (int)cpu.A << std::endl;
+    ram.LoadFile("D:/Jose/Development/Learning Cpp/NES/6502_65C02_functional_tests-master/6502_functional_test.bin");
+    CPU cpu(ram);
+    cpu.PC = 0x0400;
+    cpu.Execute(0xFFFFFFFF);
 
     return 0;
 }

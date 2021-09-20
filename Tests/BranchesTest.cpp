@@ -22,7 +22,7 @@
 
 TEST(BranchesTest, BCC_REL) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     cpu.PS.flags.C = 0;
     mem[0] = static_cast<uint8_t>(Opcode::BCC_REL);
@@ -35,7 +35,7 @@ TEST(BranchesTest, BCC_REL) {
 
 TEST(BranchesTest, BVS_REL) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     cpu.PS.flags.V = 1;
     cpu.PC = 0xFD;
@@ -49,7 +49,7 @@ TEST(BranchesTest, BVS_REL) {
 
 TEST(BranchesTest, BNE_REL) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     cpu.PS.flags.N = 0;
     cpu.PC = 0xFD;

@@ -22,7 +22,7 @@
 
 TEST(SystemFunctions, BRK_RTI) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     cpu.PS.PS_byte = 0b11000001;
 
@@ -45,7 +45,7 @@ TEST(SystemFunctions, BRK_RTI) {
 
 TEST(SystemFunctions, NOP) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::NOP);
     mem[1] = static_cast<uint8_t>(Opcode::NOP);

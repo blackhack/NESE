@@ -22,7 +22,7 @@
 
 TEST(StackOperationsTest, TSX) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::TSX);
     cpu.SP = 0xF1;
@@ -34,7 +34,7 @@ TEST(StackOperationsTest, TSX) {
 
 TEST(StackOperationsTest, TXS) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::TXS);
     cpu.X = 0xEC;
@@ -46,7 +46,7 @@ TEST(StackOperationsTest, TXS) {
 
 TEST(StackOperationsTest, PHA_PLA) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::PHA);
     mem[1] = static_cast<uint8_t>(Opcode::PLA);
@@ -65,7 +65,7 @@ TEST(StackOperationsTest, PHA_PLA) {
 
 TEST(StackOperationsTest, PHP_PLP) {
     Memory mem;
-    CPU cpu(mem, 1790000);
+    CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::PHP);
     mem[1] = static_cast<uint8_t>(Opcode::PLP);

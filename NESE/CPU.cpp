@@ -18,12 +18,9 @@
 
 #include "CPU.h"
 #include <iostream>
-#include <chrono>
-#include <thread>
 
-CPU::CPU(Memory& mem, uint32_t frequency) : memory(mem)
+CPU::CPU(Memory& mem) : memory(mem)
 {
-    cycle_period_ns = static_cast<uint64_t>((1.0 / frequency) * 1000000000);
     Reset();
 }
 
@@ -44,20 +41,12 @@ void CPU::Reset()
     PS.flags.N = 0;
 }
 
-uint64_t GetNSTime()
-{
-    static const std::chrono::high_resolution_clock::time_point start_time = std::chrono::high_resolution_clock::now();
-    return uint64_t(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - start_time).count());
-}
-
 uint32_t CPU::Execute(uint32_t instructions_to_execute)
 {
     uint32_t total_cycles = 0;
 
     while (instructions_to_execute > 0)
     {
-        uint64_t start_time = GetNSTime();
-
         Opcode instruction = static_cast<Opcode>(GetByteFromPC());
         uint8_t instruction_cycles = 0;
 
@@ -75,17 +64,6 @@ uint32_t CPU::Execute(uint32_t instructions_to_execute)
 
         total_cycles += instruction_cycles;
         --instructions_to_execute;
-
-        uint64_t end_time = GetNSTime();
-        uint64_t elapse_instruction_time = end_time - start_time;
-        uint64_t expected_instruction_time = cycle_period_ns * instruction_cycles;
-        if (elapse_instruction_time < expected_instruction_time)
-        {
-            //std::cout << "Elapse: " << elapse_instruction_time << " - Expected: " << expected_instruction_time << " - Sleeping for: " << expected_instruction_time - elapse_instruction_time << "\n";
-            std::this_thread::sleep_for(std::chrono::nanoseconds(expected_instruction_time - elapse_instruction_time));
-        }
-
-        //std::cout << "Final instruction time: " << GetNSTime() - start_time << "ns\n";
     }
 
     return total_cycles;
@@ -2168,11 +2146,12 @@ uint8_t CPU::BRK()
 
     PS.flags.B = 1;
     PS.flags.U = 1;
-    PS.flags.I = 1;
 
     PushWordToStack(PC);
     PushByteToStack(PS.PS_byte);
     PC = GetWordFromAddress(0xFFFE);
+
+    PS.flags.I = 1;
 
     return 0;
 }
@@ -2189,7 +2168,6 @@ uint8_t CPU::RTI()
 
     PS.flags.B = 0;
     PS.flags.U = 0;
-    PS.flags.I = 0;
 
     return 0;
 }

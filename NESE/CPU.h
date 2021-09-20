@@ -30,7 +30,7 @@
 class CPU
 {
 public:
-    CPU(Memory& mem, uint32_t frequency);
+    CPU(Memory& mem);
 
     void Reset();
 
@@ -259,7 +259,6 @@ public:
     uint8_t RTI();
 
     Memory& memory;
-    uint64_t cycle_period_ns;
 };
 
 #endif // CPU_h__
