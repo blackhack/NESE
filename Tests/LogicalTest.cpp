@@ -105,9 +105,9 @@ TEST(LogicalTest, BIT_ABS) {
 
     uint32_t cycles = cpu.Execute(1);
     EXPECT_EQ(cpu.A, 0xCC);
-    EXPECT_TRUE(cpu.PS.flags.Z);
-    EXPECT_FALSE(cpu.PS.flags.V);
-    EXPECT_FALSE(cpu.PS.flags.N);
+    EXPECT_TRUE(cpu.P.Flags.Z);
+    EXPECT_FALSE(cpu.P.Flags.V);
+    EXPECT_FALSE(cpu.P.Flags.N);
     EXPECT_EQ(cycles, 4);
 
     mem[3] = static_cast<uint8_t>(Opcode::BIT_ABS);
@@ -118,8 +118,8 @@ TEST(LogicalTest, BIT_ABS) {
 
     cycles = cpu.Execute(1);
     EXPECT_EQ(cpu.A, 0x4E);
-    EXPECT_FALSE(cpu.PS.flags.Z);
-    EXPECT_TRUE(cpu.PS.flags.V);
-    EXPECT_FALSE(cpu.PS.flags.N);
+    EXPECT_FALSE(cpu.P.Flags.Z);
+    EXPECT_TRUE(cpu.P.Flags.V);
+    EXPECT_FALSE(cpu.P.Flags.N);
     EXPECT_EQ(cycles, 4);
 }

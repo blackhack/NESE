@@ -70,15 +70,15 @@ TEST(StackOperationsTest, PHP_PLP) {
     mem[0] = static_cast<uint8_t>(Opcode::PHP);
     mem[1] = static_cast<uint8_t>(Opcode::PLP);
 
-    cpu.PS.PS_byte = 0b10110101;
+    cpu.P.Pbyte = 0b10110101;
 
     uint32_t cycles = cpu.Execute(1);
     EXPECT_EQ(cycles, 3);
 
-    cpu.PS.PS_byte = 0b00000000; // PLP should set it from data in stack
+    cpu.P.Pbyte = 0b00000000; // PLP should set it from data in stack
                                  // bits 4 and 5 are unset
 
     cycles = cpu.Execute(1);
-    EXPECT_EQ(cpu.PS.PS_byte, 0b10000101);
+    EXPECT_EQ(cpu.P.Pbyte, 0b10000101);
     EXPECT_EQ(cycles, 4);
 }

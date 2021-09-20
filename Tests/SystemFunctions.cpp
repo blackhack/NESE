@@ -24,7 +24,7 @@ TEST(SystemFunctions, BRK_RTI) {
     Memory mem;
     CPU cpu(mem);
 
-    cpu.PS.PS_byte = 0b11000001;
+    cpu.P.Pbyte = 0b11000001;
 
     mem[0] = static_cast<uint8_t>(Opcode::BRK);
     mem[0xFFFE] = 0x25;
@@ -35,11 +35,11 @@ TEST(SystemFunctions, BRK_RTI) {
     EXPECT_EQ(cpu.PC, 0xAE25);
     EXPECT_EQ(cycles, 7);
 
-    cpu.PS.PS_byte = 0b00110100;
+    cpu.P.Pbyte = 0b00110100;
 
     cycles = cpu.Execute(1);
     EXPECT_EQ(cpu.PC, 2);
-    EXPECT_EQ(cpu.PS.PS_byte, 0b11000001);
+    EXPECT_EQ(cpu.P.Pbyte, 0b11000001);
     EXPECT_EQ(cycles, 6);
 }
 

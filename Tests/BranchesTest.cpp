@@ -24,7 +24,7 @@ TEST(BranchesTest, BCC_REL) {
     Memory mem;
     CPU cpu(mem);
 
-    cpu.PS.flags.C = 0;
+    cpu.P.Flags.C = 0;
     mem[0] = static_cast<uint8_t>(Opcode::BCC_REL);
     mem[1] = 0x78;
 
@@ -37,7 +37,7 @@ TEST(BranchesTest, BVS_REL) {
     Memory mem;
     CPU cpu(mem);
 
-    cpu.PS.flags.V = 1;
+    cpu.P.Flags.V = 1;
     cpu.PC = 0xFD;
     mem[0xFD] = static_cast<uint8_t>(Opcode::BVS_REL);
     mem[0xFE] = 0x78;
@@ -51,7 +51,7 @@ TEST(BranchesTest, BNE_REL) {
     Memory mem;
     CPU cpu(mem);
 
-    cpu.PS.flags.N = 0;
+    cpu.P.Flags.N = 0;
     cpu.PC = 0xFD;
     mem[0xFD] = static_cast<uint8_t>(Opcode::BNE_REL);
     mem[0xFE] = 0x88; // This is taken as a signed byte, si 0x88 is -120 or -0x78

@@ -53,12 +53,13 @@ public:
             uint8_t U:  1; // Unused        | but are used when flags are pushed onto stack
             uint8_t V : 1; // Overflow Flag
             uint8_t N : 1; // Negative Flag
-        } flags;
+        } Flags;
 
-        uint8_t PS_byte;
-    } PS;
+        uint8_t Pbyte;     // Direct access to all the flags as a single byte
+    } P;
 
     uint32_t Execute(uint32_t instructions_to_execute);
+
     uint8_t CPU::GetByteFromPC();
     uint16_t CPU::GetWordFromPC();
     uint8_t CPU::GetByteFromAddress(uint16_t address);
@@ -71,7 +72,6 @@ public:
     void PushWordToStack(uint16_t data);
     uint8_t PullByteFromStack();
     uint16_t PullWordFromStack();
-
 
     uint8_t LDA_IM();
     uint8_t LDA_ZP();

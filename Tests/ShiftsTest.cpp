@@ -26,11 +26,11 @@ TEST(ShiftsTest, ASL_ACC) {
 
     mem[0] = static_cast<uint8_t>(Opcode::ASL_ACC);
     cpu.A = 0b10000001;
-    cpu.PS.flags.C = 0;
+    cpu.P.Flags.C = 0;
 
     uint32_t cycles = cpu.Execute(1);
     EXPECT_EQ(cpu.A, 2);
-    EXPECT_EQ(cpu.PS.flags.C, 1);
+    EXPECT_EQ(cpu.P.Flags.C, 1);
     EXPECT_EQ(cycles, 2);
 }
 
@@ -41,11 +41,11 @@ TEST(ShiftsTest, LSR_ZP) {
     mem[0] = static_cast<uint8_t>(Opcode::LSR_ZP);
     mem[1] = 0x15;
     mem[0x0015] = 0b10000001;
-    cpu.PS.flags.C = 0;
+    cpu.P.Flags.C = 0;
 
     uint32_t cycles = cpu.Execute(1);
     EXPECT_EQ(mem[0x0015], 64);
-    EXPECT_EQ(cpu.PS.flags.C, 1);
+    EXPECT_EQ(cpu.P.Flags.C, 1);
     EXPECT_EQ(cycles, 5);
 }
 
@@ -57,11 +57,11 @@ TEST(ShiftsTest, ROL_ABS) {
     mem[1] = 0x15;
     mem[2] = 0x78;
     mem[0x7815] = 0b00000001;
-    cpu.PS.flags.C = 1;
+    cpu.P.Flags.C = 1;
 
     uint32_t cycles = cpu.Execute(1);
     EXPECT_EQ(mem[0x7815], 0b00000011);
-    EXPECT_EQ(cpu.PS.flags.C, 0);
+    EXPECT_EQ(cpu.P.Flags.C, 0);
     EXPECT_EQ(cycles, 6);
 }
 
@@ -73,10 +73,10 @@ TEST(ShiftsTest, ROR_ABS) {
     mem[1] = 0x15;
     mem[2] = 0x78;
     mem[0x7815] = 0b00000001;
-    cpu.PS.flags.C = 1;
+    cpu.P.Flags.C = 1;
 
     uint32_t cycles = cpu.Execute(1);
     EXPECT_EQ(mem[0x7815], 0b10000000);
-    EXPECT_EQ(cpu.PS.flags.C, 1);
+    EXPECT_EQ(cpu.P.Flags.C, 1);
     EXPECT_EQ(cycles, 6);
 }
