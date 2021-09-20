@@ -263,7 +263,7 @@ uint8_t CPU::LDA_IND_X()
 
 uint8_t CPU::LDA_IND_Y()
 {
-    bool page_crossed = false;;
+    bool page_crossed = false;
 
     uint16_t ZP_address = GetByteFromPC();
     uint16_t base_address = GetWordFromAddress(ZP_address);
@@ -326,7 +326,7 @@ uint8_t CPU::LDX_ABS()
 
 uint8_t CPU::LDX_ABS_Y()
 {
-    bool page_crossed = false;;
+    bool page_crossed = false;
 
     uint16_t base_address = GetWordFromPC();
     uint16_t final_address = base_address + Y;
@@ -388,7 +388,7 @@ uint8_t CPU::LDY_ABS()
 
 uint8_t CPU::LDY_ABS_X()
 {
-    bool page_crossed = false;;
+    bool page_crossed = false;
 
     uint16_t base_address = GetWordFromPC();
     uint16_t final_address = base_address + X;
@@ -707,7 +707,7 @@ uint8_t CPU::AND_IND_X()
 
 uint8_t CPU::AND_IND_Y()
 {
-    bool page_crossed = false;;
+    bool page_crossed = false;
 
     uint16_t ZP_address = GetByteFromPC();
     uint16_t base_address = GetWordFromAddress(ZP_address);
@@ -819,7 +819,7 @@ uint8_t CPU::EOR_IND_X()
 
 uint8_t CPU::EOR_IND_Y()
 {
-    bool page_crossed = false;;
+    bool page_crossed = false;
 
     uint16_t ZP_address = GetByteFromPC();
     uint16_t base_address = GetWordFromAddress(ZP_address);
@@ -931,7 +931,7 @@ uint8_t CPU::ORA_IND_X()
 
 uint8_t CPU::ORA_IND_Y()
 {
-    bool page_crossed = false;;
+    bool page_crossed = false;
 
     uint16_t ZP_address = GetByteFromPC();
     uint16_t base_address = GetWordFromAddress(ZP_address);
@@ -1089,7 +1089,7 @@ uint8_t CPU::ADC_IND_X()
 
 uint8_t CPU::ADC_IND_Y()
 {
-    bool page_crossed = false;;
+    bool page_crossed = false;
 
     uint16_t ZP_address = GetByteFromPC();
     uint16_t base_address = GetWordFromAddress(ZP_address);
@@ -1204,7 +1204,7 @@ uint8_t CPU::SBC_IND_X()
 
 uint8_t CPU::SBC_IND_Y()
 {
-    bool page_crossed = false;;
+    bool page_crossed = false;
 
     uint16_t ZP_address = GetByteFromPC();
     uint16_t base_address = GetWordFromAddress(ZP_address);
@@ -1326,7 +1326,7 @@ uint8_t CPU::CMP_IND_X()
 
 uint8_t CPU::CMP_IND_Y()
 {
-    bool page_crossed = false;;
+    bool page_crossed = false;
 
     uint16_t ZP_address = GetByteFromPC();
     uint16_t base_address = GetWordFromAddress(ZP_address);
