@@ -41,7 +41,7 @@ void CPU::Reset()
     P.Flags.N = 0;
 }
 
-uint32_t CPU::Execute(uint32_t instructions_to_execute)
+uint32_t CPU::Run(uint32_t instructions_to_execute)
 {
     uint32_t total_cycles = 0;
 
@@ -143,247 +143,319 @@ uint16_t CPU::PullWordFromStack()
     return data;
 }
 
+uint8_t CPU::GetDataImmediate(uint8_t *extra_cycles, uint16_t * obtained_address)
+{
+    if (extra_cycles)
+        *extra_cycles = 0;
+    if (obtained_address)
+        *obtained_address = PC;
+
+    return GetByteFromPC();
+}
+
+uint8_t CPU::GetDataZeroPage(uint8_t* extra_cycles, uint16_t* obtained_address)
+{
+    uint16_t ZP_address = GetByteFromPC();
+
+    if (extra_cycles)
+        *extra_cycles = 0;
+    if (obtained_address)
+        *obtained_address = ZP_address;
+
+    return GetByteFromAddress(ZP_address);
+}
+
+uint8_t CPU::GetDataZeroPageX(uint8_t* extra_cycles, uint16_t* obtained_address)
+{
+    uint16_t ZP_address = GetByteFromPC();
+    ZP_address += X;
+    ZP_address &= 0xFF; // This address require a truncation to 8 bits (zero page address)
+
+    if (extra_cycles)
+        *extra_cycles = 0;
+    if (obtained_address)
+        *obtained_address = ZP_address;
+
+    return GetByteFromAddress(ZP_address);
+}
+
+uint8_t CPU::GetDataZeroPageY(uint8_t* extra_cycles, uint16_t* obtained_address)
+{
+    uint16_t ZP_address = GetByteFromPC();
+    ZP_address += Y;
+    ZP_address &= 0xFF; // This address require a truncation to 8 bits (zero page address)
+
+    if (extra_cycles)
+        *extra_cycles = 0;
+    if (obtained_address)
+        *obtained_address = ZP_address;
+
+    return GetByteFromAddress(ZP_address);
+}
+
+uint8_t CPU::GetDataAbsolute(uint8_t* extra_cycles, uint16_t* obtained_address)
+{
+    uint16_t address = GetWordFromPC();
+
+    if (extra_cycles)
+        *extra_cycles = 0;
+    if (obtained_address)
+        *obtained_address = address;
+
+    return GetByteFromAddress(address);
+}
+
+uint8_t CPU::GetDataAbsoluteX(uint8_t* extra_cycles, uint16_t* obtained_address)
+{
+    uint16_t base_address = GetWordFromPC();
+    uint16_t final_address = base_address + X;
+
+    if (extra_cycles && (final_address ^ base_address) >> 8)
+        *extra_cycles = 1;
+    else if (extra_cycles)
+        *extra_cycles = 0;
+    if (obtained_address)
+        *obtained_address = final_address;
+
+    return GetByteFromAddress(final_address);
+}
+
+uint8_t CPU::GetDataAbsoluteY(uint8_t* extra_cycles, uint16_t* obtained_address)
+{
+    uint16_t base_address = GetWordFromPC();
+    uint16_t final_address = base_address + Y;
+
+    if (extra_cycles && (final_address ^ base_address) >> 8)
+        *extra_cycles = 1;
+    else if (extra_cycles)
+        *extra_cycles = 0;
+    if (obtained_address)
+        *obtained_address = final_address;
+
+    return GetByteFromAddress(final_address);
+}
+
+uint8_t CPU::GetDataIndirectX(uint8_t* extra_cycles, uint16_t* obtained_address)
+{
+    uint16_t ZP_address = GetByteFromPC();
+    ZP_address += X;
+    ZP_address &= 0xFF; // This address require a truncation to 8 bits (zero page address)
+    uint16_t final_address = GetWordFromAddress(ZP_address);
+
+    if (extra_cycles)
+        *extra_cycles = 0;
+    if (obtained_address)
+        *obtained_address = final_address;
+
+    return GetByteFromAddress(final_address);
+}
+
+uint8_t CPU::GetDataIndirectY(uint8_t* extra_cycles, uint16_t* obtained_address)
+{
+    uint16_t ZP_address = GetByteFromPC();
+    uint16_t base_address = GetWordFromAddress(ZP_address);
+    uint16_t final_address = base_address + Y;
+
+    if (extra_cycles && (final_address ^ base_address) >> 8)
+        *extra_cycles = 1;
+    else if (extra_cycles)
+        *extra_cycles = 0;
+    if (obtained_address)
+        *obtained_address = final_address;
+
+    return GetByteFromAddress(final_address);
+}
+
+void CPU::SetNegativeAndZeroFlags(uint8_t data)
+{
+    P.Flags.Z = (data == 0 ? 1 : 0);
+    P.Flags.N = checkBit(data, 7);
+}
+
+uint8_t CPU::ADC(uint8_t a, uint8_t b)
+{
+    uint16_t total = a + b + P.Flags.C;
+    uint8_t result = total & 0xFF;
+    bool same_sign_before = checkBit(~(a ^ b), 7);
+    bool same_sign_after = checkBit(~(result ^ b), 7);
+
+    P.Flags.C = total > 0xFF;
+    P.Flags.V = (same_sign_before && !same_sign_after);
+
+    return result;
+}
+
+uint8_t CPU::SBC(uint8_t a, uint8_t b)
+{
+    return ADC(a, ~b);
+}
+
 uint8_t CPU::LDA_IM()
 {
-    A = GetByteFromPC();
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
+    uint8_t extra_cycles = 0;
+    A = GetDataImmediate(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::LDA_ZP()
 {
-    uint16_t ZP_address = GetByteFromPC();
-    A = GetByteFromAddress(ZP_address);
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
+    uint8_t extra_cycles = 0;
+    A = GetDataZeroPage(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::LDA_ZP_X()
 {
-    uint16_t ZP_address = GetByteFromPC();
+    uint8_t extra_cycles = 0;
+    A = GetDataZeroPageX(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    ZP_address += X;
-    ZP_address &= 0xFF;// This address require a truncation to 8 bits (zero page address)
-
-    A = GetByteFromAddress(ZP_address);
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::LDA_ABS()
 {
-    uint16_t address = GetWordFromPC();
+    uint8_t extra_cycles = 0;
+    A = GetDataAbsolute(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    A = GetByteFromAddress(address);
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::LDA_ABS_X()
 {
-    bool page_crossed = false;
+    uint8_t extra_cycles = 0;
+    A = GetDataAbsoluteX(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    uint16_t base_address = GetWordFromPC();
-    uint16_t final_address = base_address + X;
-
-    if ((final_address ^ base_address) >> 8)
-        page_crossed = true;
-
-    A = GetByteFromAddress(final_address);
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-
-    return (page_crossed ? 1 : 0);
+    return extra_cycles;
 }
-
 
 uint8_t CPU::LDA_ABS_Y()
 {
-    bool page_crossed = false;
+    uint8_t extra_cycles = 0;
+    A = GetDataAbsoluteY(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    uint16_t base_address = GetWordFromPC();
-    uint16_t final_address = base_address + Y;
-
-    if ((final_address ^ base_address) >> 8)
-        page_crossed = true;
-
-    A = GetByteFromAddress(final_address);
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return (page_crossed ? 1 : 0);
+    return extra_cycles;
 }
 
 uint8_t CPU::LDA_IND_X()
 {
-    uint16_t ZP_address = GetByteFromPC();
+    uint8_t extra_cycles = 0;
+    A = GetDataIndirectX(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    ZP_address += X;
-    ZP_address &= 0xFF; // This address require a truncation to 8 bits (zero page address)
-
-    uint16_t final_address = GetWordFromAddress(ZP_address);
-
-    A = GetByteFromAddress(final_address);
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::LDA_IND_Y()
 {
-    bool page_crossed = false;
+    uint8_t extra_cycles = 0;
+    A = GetDataIndirectY(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    uint16_t ZP_address = GetByteFromPC();
-    uint16_t base_address = GetWordFromAddress(ZP_address);
-
-    uint16_t final_address = base_address + Y;
-    if ((final_address ^ base_address) >> 8)
-        page_crossed = true;
-
-    A = GetByteFromAddress(final_address);
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return (page_crossed ? 1 : 0);
+    return extra_cycles;
 }
 
 uint8_t CPU::LDX_IM()
 {
-    X = GetByteFromPC();
-    P.Flags.Z = (X == 0 ? 1 : 0);
-    P.Flags.N = checkBit(X, 7);
+    uint8_t extra_cycles = 0;
+    X = GetDataImmediate(&extra_cycles);
+    SetNegativeAndZeroFlags(X);
 
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::LDX_ZP()
 {
-    uint16_t ZP_address = GetByteFromPC();
+    uint8_t extra_cycles = 0;
+    X = GetDataZeroPage(&extra_cycles);
+    SetNegativeAndZeroFlags(X);
 
-    X = GetByteFromAddress(ZP_address);
-    P.Flags.Z = (X == 0 ? 1 : 0);
-    P.Flags.N = checkBit(X, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::LDX_ZP_Y()
 {
-    uint16_t ZP_address = GetByteFromPC();
+    uint8_t extra_cycles = 0;
+    X = GetDataZeroPageY(&extra_cycles);
+    SetNegativeAndZeroFlags(X);
 
-    ZP_address += Y;
-    ZP_address &= 0xFF;// This address require a truncation to 8 bits (zero page address)
-
-    X = GetByteFromAddress(ZP_address);
-    P.Flags.Z = (X == 0 ? 1 : 0);
-    P.Flags.N = checkBit(X, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::LDX_ABS()
 {
-    uint16_t address = GetWordFromPC();
+    uint8_t extra_cycles = 0;
+    X = GetDataAbsolute(&extra_cycles);
+    SetNegativeAndZeroFlags(X);
 
-    X = GetByteFromAddress(address);
-    P.Flags.Z = (X == 0 ? 1 : 0);
-    P.Flags.N = checkBit(X, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::LDX_ABS_Y()
 {
-    bool page_crossed = false;
+    uint8_t extra_cycles = 0;
+    X = GetDataAbsoluteY(&extra_cycles);
+    SetNegativeAndZeroFlags(X);
 
-    uint16_t base_address = GetWordFromPC();
-    uint16_t final_address = base_address + Y;
-
-    if ((final_address ^ base_address) >> 8)
-        page_crossed = true;
-
-    X = GetByteFromAddress(final_address);
-    P.Flags.Z = (X == 0 ? 1 : 0);
-    P.Flags.N = checkBit(X, 7);
-
-    return (page_crossed ? 1 : 0);
+    return extra_cycles;
 }
 
 uint8_t CPU::LDY_IM()
 {
-    Y = GetByteFromPC();
-    P.Flags.Z = (Y == 0 ? 1 : 0);
-    P.Flags.N = checkBit(Y, 7);
+    uint8_t extra_cycles = 0;
+    Y = GetDataImmediate(&extra_cycles);
+    SetNegativeAndZeroFlags(Y);
 
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::LDY_ZP()
 {
-    uint16_t ZP_address = GetByteFromPC();
+    uint8_t extra_cycles = 0;
+    Y = GetDataZeroPage(&extra_cycles);
+    SetNegativeAndZeroFlags(Y);
 
-    Y = GetByteFromAddress(ZP_address);
-    P.Flags.Z = (Y == 0 ? 1 : 0);
-    P.Flags.N = checkBit(Y, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::LDY_ZP_X()
 {
-    uint16_t ZP_address = GetByteFromPC();
+    uint8_t extra_cycles = 0;
+    Y = GetDataZeroPageX(&extra_cycles);
+    SetNegativeAndZeroFlags(Y);
 
-    ZP_address += X;
-    ZP_address &= 0xFF;// This address require a truncation to 8 bits (zero page address)
-
-    Y = GetByteFromAddress(ZP_address);
-    P.Flags.Z = (Y == 0 ? 1 : 0);
-    P.Flags.N = checkBit(Y, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::LDY_ABS()
 {
-    uint16_t address = GetWordFromPC();
+    uint8_t extra_cycles = 0;
+    Y = GetDataAbsolute(&extra_cycles);
+    SetNegativeAndZeroFlags(Y);
 
-    Y = GetByteFromAddress(address);
-    P.Flags.Z = (Y == 0 ? 1 : 0);
-    P.Flags.N = checkBit(Y, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::LDY_ABS_X()
 {
-    bool page_crossed = false;
+    uint8_t extra_cycles = 0;
+    Y = GetDataAbsoluteX(&extra_cycles);
+    SetNegativeAndZeroFlags(Y);
 
-    uint16_t base_address = GetWordFromPC();
-    uint16_t final_address = base_address + X;
-
-    if ((final_address ^ base_address) >> 8)
-        page_crossed = true;
-
-    Y = GetByteFromAddress(final_address);
-    P.Flags.Z = (Y == 0 ? 1 : 0);
-    P.Flags.N = checkBit(Y, 7);
-
-    return (page_crossed ? 1 : 0);
+    return extra_cycles;
 }
 
 uint8_t CPU::STA_ZP()
 {
-    uint16_t ZP_address = GetByteFromPC();
+    uint16_t ZP_address;
+    GetDataZeroPage(nullptr, &ZP_address);
     SetByte(ZP_address, A);
 
     return 0;
@@ -391,11 +463,8 @@ uint8_t CPU::STA_ZP()
 
 uint8_t CPU::STA_ZP_X()
 {
-    uint16_t ZP_address = GetByteFromPC();
-
-    ZP_address += X;
-    ZP_address &= 0xFF;// This address require a truncation to 8 bits (zero page address)
-
+    uint16_t ZP_address;
+    GetDataZeroPageX(nullptr, &ZP_address);
     SetByte(ZP_address, A);
 
     return 0;
@@ -403,7 +472,8 @@ uint8_t CPU::STA_ZP_X()
 
 uint8_t CPU::STA_ABS()
 {
-    uint16_t address = GetWordFromPC();
+    uint16_t address;
+    GetDataAbsolute(nullptr, &address);
     SetByte(address, A);
 
     return 0;
@@ -411,7 +481,8 @@ uint8_t CPU::STA_ABS()
 
 uint8_t CPU::STA_ABS_X()
 {
-    uint16_t address = GetWordFromPC() + X;
+    uint16_t address;
+    GetDataAbsoluteX(nullptr, &address);
     SetByte(address, A);
 
     return 0;
@@ -419,7 +490,8 @@ uint8_t CPU::STA_ABS_X()
 
 uint8_t CPU::STA_ABS_Y()
 {
-    uint16_t address = GetWordFromPC() + Y;
+    uint16_t address;
+    GetDataAbsoluteY(nullptr, &address);
     SetByte(address, A);
 
     return 0;
@@ -427,29 +499,26 @@ uint8_t CPU::STA_ABS_Y()
 
 uint8_t CPU::STA_IND_X()
 {
-    uint16_t ZP_address = GetByteFromPC();
-
-    ZP_address += X;
-    ZP_address &= 0xFF; // This address require a truncation to 8 bits (zero page address)
-
-    uint16_t final_address = GetWordFromAddress(ZP_address);
-    SetByte(final_address, A);
+    uint16_t address;
+    GetDataIndirectX(nullptr, &address);
+    SetByte(address, A);
 
     return 0;
 }
 
 uint8_t CPU::STA_IND_Y()
 {
-    uint16_t ZP_address = GetByteFromPC();
-    uint16_t final_address = GetWordFromAddress(ZP_address) + Y;
-    SetByte(final_address, A);
+    uint16_t address;
+    GetDataIndirectY(nullptr, &address);
+    SetByte(address, A);
 
     return 0;
 }
 
 uint8_t CPU::STX_ZP()
 {
-    uint16_t ZP_address = GetByteFromPC();
+    uint16_t ZP_address;
+    GetDataZeroPage(nullptr, &ZP_address);
     SetByte(ZP_address, X);
 
     return 0;
@@ -457,11 +526,8 @@ uint8_t CPU::STX_ZP()
 
 uint8_t CPU::STX_ZP_Y()
 {
-    uint16_t ZP_address = GetByteFromPC();
-
-    ZP_address += Y;
-    ZP_address &= 0xFF;// This address require a truncation to 8 bits (zero page address)
-
+    uint16_t ZP_address;
+    GetDataZeroPageY(nullptr, &ZP_address);
     SetByte(ZP_address, X);
 
     return 0;
@@ -469,7 +535,8 @@ uint8_t CPU::STX_ZP_Y()
 
 uint8_t CPU::STX_ABS()
 {
-    uint16_t address = GetWordFromPC();
+    uint16_t address;
+    GetDataAbsolute(nullptr, &address);
     SetByte(address, X);
 
     return 0;
@@ -477,7 +544,8 @@ uint8_t CPU::STX_ABS()
 
 uint8_t CPU::STY_ZP()
 {
-    uint16_t ZP_address = GetByteFromPC();
+    uint16_t ZP_address;
+    GetDataZeroPage(nullptr, &ZP_address);
     SetByte(ZP_address, Y);
 
     return 0;
@@ -485,11 +553,8 @@ uint8_t CPU::STY_ZP()
 
 uint8_t CPU::STY_ZP_X()
 {
-    uint16_t ZP_address = GetByteFromPC();
-
-    ZP_address += X;
-    ZP_address &= 0xFF;// This address require a truncation to 8 bits (zero page address)
-
+    uint16_t ZP_address;
+    GetDataZeroPageX(nullptr, &ZP_address);
     SetByte(ZP_address, Y);
 
     return 0;
@@ -497,7 +562,8 @@ uint8_t CPU::STY_ZP_X()
 
 uint8_t CPU::STY_ABS()
 {
-    uint16_t address = GetWordFromPC();
+    uint16_t address;
+    GetDataAbsolute(nullptr, &address);
     SetByte(address, Y);
 
     return 0;
@@ -506,8 +572,7 @@ uint8_t CPU::STY_ABS()
 uint8_t CPU::TAX()
 {
     X = A;
-    P.Flags.Z = (X == 0 ? 1 : 0);
-    P.Flags.N = checkBit(X, 7);
+    SetNegativeAndZeroFlags(X);
 
     return 0;
 }
@@ -515,8 +580,7 @@ uint8_t CPU::TAX()
 uint8_t CPU::TAY()
 {
     Y = A;
-    P.Flags.Z = (Y == 0 ? 1 : 0);
-    P.Flags.N = checkBit(Y, 7);
+    SetNegativeAndZeroFlags(Y);
 
     return 0;
 }
@@ -524,8 +588,7 @@ uint8_t CPU::TAY()
 uint8_t CPU::TXA()
 {
     A = X;
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
+    SetNegativeAndZeroFlags(A);
 
     return 0;
 }
@@ -533,8 +596,7 @@ uint8_t CPU::TXA()
 uint8_t CPU::TYA()
 {
     A = Y;
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
+    SetNegativeAndZeroFlags(A);
 
     return 0;
 }
@@ -542,8 +604,7 @@ uint8_t CPU::TYA()
 uint8_t CPU::TSX()
 {
     X = SP;
-    P.Flags.Z = (X == 0 ? 1 : 0);
-    P.Flags.N = checkBit(X, 7);
+    SetNegativeAndZeroFlags(X);
 
     return 0;
 }
@@ -574,8 +635,7 @@ uint8_t CPU::PHP()
 uint8_t CPU::PLA()
 {
     A = PullByteFromStack();
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
+    SetNegativeAndZeroFlags(A);
 
     return 0;
 }
@@ -591,344 +651,223 @@ uint8_t CPU::PLP()
 
 uint8_t CPU::AND_IM()
 {
-    A &= GetByteFromPC();
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
+    uint8_t extra_cycles = 0;
+    A &= GetDataImmediate(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::AND_ZP()
 {
-    uint16_t ZP_address = GetByteFromPC();
-    A &= GetByteFromAddress(ZP_address);
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
+    uint8_t extra_cycles = 0;
+    A &= GetDataZeroPage(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::AND_ZP_X()
 {
-    uint16_t ZP_address = GetByteFromPC();
+    uint8_t extra_cycles = 0;
+    A &= GetDataZeroPageX(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    ZP_address += X;
-    ZP_address &= 0xFF;// This address require a truncation to 8 bits (zero page address)
-
-    A &= GetByteFromAddress(ZP_address);
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::AND_ABS()
 {
-    uint16_t address = GetWordFromPC();
+    uint8_t extra_cycles = 0;
+    A &= GetDataAbsolute(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    A &= GetByteFromAddress(address);
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::AND_ABS_X()
 {
-    bool page_crossed = false;
+    uint8_t extra_cycles = 0;
+    A &= GetDataAbsoluteX(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    uint16_t base_address = GetWordFromPC();
-    uint16_t final_address = base_address + X;
-
-    if ((final_address ^ base_address) >> 8)
-        page_crossed = true;
-
-    A &= GetByteFromAddress(final_address);
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return (page_crossed ? 1 : 0);
+    return extra_cycles;
 }
 
 uint8_t CPU::AND_ABS_Y()
 {
-    bool page_crossed = false;
+    uint8_t extra_cycles = 0;
+    A &= GetDataAbsoluteY(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    uint16_t base_address = GetWordFromPC();
-    uint16_t final_address = base_address + Y;
-
-    if ((final_address ^ base_address) >> 8)
-        page_crossed = true;
-
-    A &= GetByteFromAddress(final_address);
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return (page_crossed ? 1 : 0);
+    return extra_cycles;
 }
 
 uint8_t CPU::AND_IND_X()
 {
-    uint16_t ZP_address = GetByteFromPC();
+    uint8_t extra_cycles = 0;
+    A &= GetDataIndirectX(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    ZP_address += X;
-    ZP_address &= 0xFF; // This address require a truncation to 8 bits (zero page address)
-
-    uint16_t final_address = GetWordFromAddress(ZP_address);
-
-    A &= GetByteFromAddress(final_address);
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::AND_IND_Y()
 {
-    bool page_crossed = false;
+    uint8_t extra_cycles = 0;
+    A &= GetDataIndirectY(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    uint16_t ZP_address = GetByteFromPC();
-    uint16_t base_address = GetWordFromAddress(ZP_address);
-
-    uint16_t final_address = base_address + Y;
-    if ((final_address ^ base_address) >> 8)
-        page_crossed = true;
-
-    A &= GetByteFromAddress(final_address);
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return (page_crossed ? 1 : 0);
+    return extra_cycles;
 }
 
 uint8_t CPU::EOR_IM()
 {
-    A ^= GetByteFromPC();
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
+    uint8_t extra_cycles = 0;
+    A ^= GetDataImmediate(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::EOR_ZP()
 {
-    uint16_t ZP_address = GetByteFromPC();
-    A ^= GetByteFromAddress(ZP_address);
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
+    uint8_t extra_cycles = 0;
+    A ^= GetDataZeroPage(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::EOR_ZP_X()
 {
-    uint16_t ZP_address = GetByteFromPC();
+    uint8_t extra_cycles = 0;
+    A ^= GetDataZeroPageX(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    ZP_address += X;
-    ZP_address &= 0xFF;// This address require a truncation to 8 bits (zero page address)
-
-    A ^= GetByteFromAddress(ZP_address);
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::EOR_ABS()
 {
-    uint16_t address = GetWordFromPC();
+    uint8_t extra_cycles = 0;
+    A ^= GetDataAbsolute(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    A ^= GetByteFromAddress(address);
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::EOR_ABS_X()
 {
-    bool page_crossed = false;
+    uint8_t extra_cycles = 0;
+    A ^= GetDataAbsoluteX(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    uint16_t base_address = GetWordFromPC();
-    uint16_t final_address = base_address + X;
-
-    if ((final_address ^ base_address) >> 8)
-        page_crossed = true;
-
-    A ^= GetByteFromAddress(final_address);
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return (page_crossed ? 1 : 0);
+    return extra_cycles;
 }
 
 uint8_t CPU::EOR_ABS_Y()
 {
-    bool page_crossed = false;
+    uint8_t extra_cycles = 0;
+    A ^= GetDataAbsoluteY(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    uint16_t base_address = GetWordFromPC();
-    uint16_t final_address = base_address + Y;
-
-    if ((final_address ^ base_address) >> 8)
-        page_crossed = true;
-
-    A ^= GetByteFromAddress(final_address);
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return (page_crossed ? 1 : 0);
+    return extra_cycles;
 }
 
 uint8_t CPU::EOR_IND_X()
 {
-    uint16_t ZP_address = GetByteFromPC();
+    uint8_t extra_cycles = 0;
+    A ^= GetDataIndirectX(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    ZP_address += X;
-    ZP_address &= 0xFF; // This address require a truncation to 8 bits (zero page address)
-
-    uint16_t final_address = GetWordFromAddress(ZP_address);
-
-    A ^= GetByteFromAddress(final_address);
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::EOR_IND_Y()
 {
-    bool page_crossed = false;
+    uint8_t extra_cycles = 0;
+    A ^= GetDataIndirectY(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    uint16_t ZP_address = GetByteFromPC();
-    uint16_t base_address = GetWordFromAddress(ZP_address);
-
-    uint16_t final_address = base_address + Y;
-    if ((final_address ^ base_address) >> 8)
-        page_crossed = true;
-
-    A ^= GetByteFromAddress(final_address);
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return (page_crossed ? 1 : 0);
+    return extra_cycles;
 }
 
 uint8_t CPU::ORA_IM()
 {
-    A |= GetByteFromPC();
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
+    uint8_t extra_cycles = 0;
+    A |= GetDataImmediate(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::ORA_ZP()
 {
-    uint16_t ZP_address = GetByteFromPC();
-    A |= GetByteFromAddress(ZP_address);
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
+    uint8_t extra_cycles = 0;
+    A |= GetDataZeroPage(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::ORA_ZP_X()
 {
-    uint16_t ZP_address = GetByteFromPC();
+    uint8_t extra_cycles = 0;
+    A |= GetDataZeroPageX(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    ZP_address += X;
-    ZP_address &= 0xFF;// This address require a truncation to 8 bits (zero page address)
-
-    A |= GetByteFromAddress(ZP_address);
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::ORA_ABS()
 {
-    uint16_t address = GetWordFromPC();
+    uint8_t extra_cycles = 0;
+    A |= GetDataAbsolute(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    A |= GetByteFromAddress(address);
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::ORA_ABS_X()
 {
-    bool page_crossed = false;
+    uint8_t extra_cycles = 0;
+    A |= GetDataAbsoluteX(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    uint16_t base_address = GetWordFromPC();
-    uint16_t final_address = base_address + X;
-
-    if ((final_address ^ base_address) >> 8)
-        page_crossed = true;
-
-    A |= GetByteFromAddress(final_address);
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return (page_crossed ? 1 : 0);
+    return extra_cycles;
 }
 
 uint8_t CPU::ORA_ABS_Y()
 {
-    bool page_crossed = false;
+    uint8_t extra_cycles = 0;
+    A |= GetDataAbsoluteY(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    uint16_t base_address = GetWordFromPC();
-    uint16_t final_address = base_address + Y;
-
-    if ((final_address ^ base_address) >> 8)
-        page_crossed = true;
-
-    A |= GetByteFromAddress(final_address);
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return (page_crossed ? 1 : 0);
+    return extra_cycles;
 }
 
 uint8_t CPU::ORA_IND_X()
 {
-    uint16_t ZP_address = GetByteFromPC();
+    uint8_t extra_cycles = 0;
+    A |= GetDataIndirectX(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    ZP_address += X;
-    ZP_address &= 0xFF; // This address require a truncation to 8 bits (zero page address)
-
-    uint16_t final_address = GetWordFromAddress(ZP_address);
-
-    A |= GetByteFromAddress(final_address);
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::ORA_IND_Y()
 {
-    bool page_crossed = false;
+    uint8_t extra_cycles = 0;
+    A |= GetDataIndirectY(&extra_cycles);
+    SetNegativeAndZeroFlags(A);
 
-    uint16_t ZP_address = GetByteFromPC();
-    uint16_t base_address = GetWordFromAddress(ZP_address);
-
-    uint16_t final_address = base_address + Y;
-    if ((final_address ^ base_address) >> 8)
-        page_crossed = true;
-
-    A |= GetByteFromAddress(final_address);
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return (page_crossed ? 1 : 0);
+    return extra_cycles;
 }
 
 uint8_t CPU::BIT_ZP()
 {
-    uint16_t ZP_address = GetByteFromPC();
-    uint8_t data = GetByteFromAddress(ZP_address);
+    uint8_t data = GetDataZeroPage();
     uint8_t result = A & data;
     P.Flags.Z = (result == 0 ? 1 : 0);
     P.Flags.V = checkBit(data, 6);
@@ -939,8 +878,7 @@ uint8_t CPU::BIT_ZP()
 
 uint8_t CPU::BIT_ABS()
 {
-    uint16_t address = GetWordFromPC();
-    uint8_t data = GetByteFromAddress(address);
+    uint8_t data = GetDataAbsolute();
     uint8_t result = A & data;
 
     P.Flags.Z = (result == 0 ? 1 : 0);
@@ -950,512 +888,384 @@ uint8_t CPU::BIT_ABS()
     return 0;
 }
 
-uint8_t CPU::ADC(uint8_t a, uint8_t b)
-{
-    uint16_t total = a + b + P.Flags.C;
-    uint8_t result = total & 0xFF;
-    bool same_sign_before = checkBit(~(a ^ b), 7);
-    bool same_sign_after = checkBit(~(result ^ b), 7);
-
-    P.Flags.C = total > 0xFF;
-    P.Flags.V = (same_sign_before && !same_sign_after);
-
-    return result;
-}
-
-uint8_t CPU::SBC(uint8_t a, uint8_t b)
-{
-    return ADC(a, ~b);
-}
-
 uint8_t CPU::ADC_IM()
 {
-    A = ADC(A, GetByteFromPC());
+    uint8_t extra_cycles = 0;
+    uint8_t data = GetDataImmediate(&extra_cycles);
+    A = ADC(A, data);
+    SetNegativeAndZeroFlags(A);
 
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::ADC_ZP()
 {
-    uint16_t ZP_address = GetByteFromPC();
-    A = ADC(A, GetByteFromAddress(ZP_address));
+    uint8_t extra_cycles = 0;
+    uint8_t data = GetDataZeroPage(&extra_cycles);
+    A = ADC(A, data);
+    SetNegativeAndZeroFlags(A);
 
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::ADC_ZP_X()
 {
-    uint16_t ZP_address = GetByteFromPC();
+    uint8_t extra_cycles = 0;
+    uint8_t data = GetDataZeroPageX(&extra_cycles);
+    A = ADC(A, data);
+    SetNegativeAndZeroFlags(A);
 
-    ZP_address += X;
-    ZP_address &= 0xFF;// This address require a truncation to 8 bits (zero page address)
-
-    A = ADC(A, GetByteFromAddress(ZP_address));
-
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::ADC_ABS()
 {
-    uint16_t address = GetWordFromPC();
-    A = ADC(A, GetByteFromAddress(address));
+    uint8_t extra_cycles = 0;
+    uint8_t data = GetDataAbsolute(&extra_cycles);
+    A = ADC(A, data);
+    SetNegativeAndZeroFlags(A);
 
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::ADC_ABS_X()
 {
-    bool page_crossed = false;
+    uint8_t extra_cycles = 0;
+    uint8_t data = GetDataAbsoluteX(&extra_cycles);
+    A = ADC(A, data);
+    SetNegativeAndZeroFlags(A);
 
-    uint16_t base_address = GetWordFromPC();
-    uint16_t final_address = base_address + X;
-
-    if ((final_address ^ base_address) >> 8)
-        page_crossed = true;
-
-    A = ADC(A, GetByteFromAddress(final_address));
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return (page_crossed ? 1 : 0);
+    return extra_cycles;
 }
 
 uint8_t CPU::ADC_ABS_Y()
 {
-    bool page_crossed = false;
+    uint8_t extra_cycles = 0;
+    uint8_t data = GetDataAbsoluteY(&extra_cycles);
+    A = ADC(A, data);
+    SetNegativeAndZeroFlags(A);
 
-    uint16_t base_address = GetWordFromPC();
-    uint16_t final_address = base_address + Y;
-
-    if ((final_address ^ base_address) >> 8)
-        page_crossed = true;
-
-    A = ADC(A, GetByteFromAddress(final_address));
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return (page_crossed ? 1 : 0);
+    return extra_cycles;
 }
 
 uint8_t CPU::ADC_IND_X()
 {
-    uint16_t ZP_address = GetByteFromPC();
+    uint8_t extra_cycles = 0;
+    uint8_t data = GetDataIndirectX(&extra_cycles);
+    A = ADC(A, data);
+    SetNegativeAndZeroFlags(A);
 
-    ZP_address += X;
-    ZP_address &= 0xFF; // This address require a truncation to 8 bits (zero page address)
-
-    uint16_t final_address = GetWordFromAddress(ZP_address);
-
-    A = ADC(A, GetByteFromAddress(final_address));
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
+    return extra_cycles;
 
     return 0;
 }
 
 uint8_t CPU::ADC_IND_Y()
 {
-    bool page_crossed = false;
+    uint8_t extra_cycles = 0;
+    uint8_t data = GetDataIndirectY(&extra_cycles);
+    A = ADC(A, data);
+    SetNegativeAndZeroFlags(A);
 
-    uint16_t ZP_address = GetByteFromPC();
-    uint16_t base_address = GetWordFromAddress(ZP_address);
-
-    uint16_t final_address = base_address + Y;
-    if ((final_address ^ base_address) >> 8)
-        page_crossed = true;
-
-    A = ADC(A, GetByteFromAddress(final_address));
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return (page_crossed ? 1 : 0);
+    return extra_cycles;
 }
 
 uint8_t CPU::SBC_IM()
 {
-    A = SBC(A, GetByteFromPC());
+    uint8_t extra_cycles = 0;
+    uint8_t data = GetDataImmediate(&extra_cycles);
+    A = SBC(A, data);
+    SetNegativeAndZeroFlags(A);
 
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::SBC_ZP()
 {
-    uint16_t ZP_address = GetByteFromPC();
-    A = SBC(A, GetByteFromAddress(ZP_address));
+    uint8_t extra_cycles = 0;
+    uint8_t data = GetDataZeroPage(&extra_cycles);
+    A = SBC(A, data);
+    SetNegativeAndZeroFlags(A);
 
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::SBC_ZP_X()
 {
-    uint16_t ZP_address = GetByteFromPC();
+    uint8_t extra_cycles = 0;
+    uint8_t data = GetDataZeroPageX(&extra_cycles);
+    A = SBC(A, data);
+    SetNegativeAndZeroFlags(A);
 
-    ZP_address += X;
-    ZP_address &= 0xFF;// This address require a truncation to 8 bits (zero page address)
-
-    A = SBC(A, GetByteFromAddress(ZP_address));
-
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::SBC_ABS()
 {
-    uint16_t address = GetWordFromPC();
-    A = SBC(A, GetByteFromAddress(address));
+    uint8_t extra_cycles = 0;
+    uint8_t data = GetDataAbsolute(&extra_cycles);
+    A = SBC(A, data);
+    SetNegativeAndZeroFlags(A);
 
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::SBC_ABS_X()
 {
-    bool page_crossed = false;
+    uint8_t extra_cycles = 0;
+    uint8_t data = GetDataAbsoluteX(&extra_cycles);
+    A = SBC(A, data);
+    SetNegativeAndZeroFlags(A);
 
-    uint16_t base_address = GetWordFromPC();
-    uint16_t final_address = base_address + X;
-
-    if ((final_address ^ base_address) >> 8)
-        page_crossed = true;
-
-    A = SBC(A, GetByteFromAddress(final_address));
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return (page_crossed ? 1 : 0);
+    return extra_cycles;
 }
 
 uint8_t CPU::SBC_ABS_Y()
 {
-    bool page_crossed = false;
+    uint8_t extra_cycles = 0;
+    uint8_t data = GetDataAbsoluteY(&extra_cycles);
+    A = SBC(A, data);
+    SetNegativeAndZeroFlags(A);
 
-    uint16_t base_address = GetWordFromPC();
-    uint16_t final_address = base_address + Y;
-
-    if ((final_address ^ base_address) >> 8)
-        page_crossed = true;
-
-    A = SBC(A, GetByteFromAddress(final_address));
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return (page_crossed ? 1 : 0);
+    return extra_cycles;
 }
 
 uint8_t CPU::SBC_IND_X()
 {
-    uint16_t ZP_address = GetByteFromPC();
+    uint8_t extra_cycles = 0;
+    uint8_t data = GetDataIndirectX(&extra_cycles);
+    A = SBC(A, data);
+    SetNegativeAndZeroFlags(A);
 
-    ZP_address += X;
-    ZP_address &= 0xFF; // This address require a truncation to 8 bits (zero page address)
-
-    uint16_t final_address = GetWordFromAddress(ZP_address);
-
-    A = SBC(A, GetByteFromAddress(final_address));
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::SBC_IND_Y()
 {
-    bool page_crossed = false;
+    uint8_t extra_cycles = 0;
+    uint8_t data = GetDataIndirectY(&extra_cycles);
+    A = SBC(A, data);
+    SetNegativeAndZeroFlags(A);
 
-    uint16_t ZP_address = GetByteFromPC();
-    uint16_t base_address = GetWordFromAddress(ZP_address);
-
-    uint16_t final_address = base_address + Y;
-    if ((final_address ^ base_address) >> 8)
-        page_crossed = true;
-
-    A = SBC(A, GetByteFromAddress(final_address));
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
-
-    return (page_crossed ? 1 : 0);
+    return extra_cycles;
 }
 
 uint8_t CPU::CMP_IM()
 {
-    uint8_t data = GetByteFromPC();
+    uint8_t extra_cycles = 0;
+    uint8_t data = GetDataImmediate(&extra_cycles);
 
     P.Flags.C = (A >= data ? 1 : 0);
     P.Flags.Z = (A == data ? 1 : 0);
     P.Flags.N = checkBit((A - data), 7);
 
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::CMP_ZP()
 {
-    uint16_t ZP_address = GetByteFromPC();
-    uint8_t data = GetByteFromAddress(ZP_address);
+    uint8_t extra_cycles = 0;
+    uint8_t data = GetDataZeroPage(&extra_cycles);
 
     P.Flags.C = (A >= data ? 1 : 0);
     P.Flags.Z = (A == data ? 1 : 0);
     P.Flags.N = checkBit((A - data), 7);
 
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::CMP_ZP_X()
 {
-    uint16_t ZP_address = GetByteFromPC();
-
-    ZP_address += X;
-    ZP_address &= 0xFF;// This address require a truncation to 8 bits (zero page address)
-
-    uint8_t data = GetByteFromAddress(ZP_address);
+    uint8_t extra_cycles = 0;
+    uint8_t data = GetDataZeroPageX(&extra_cycles);
 
     P.Flags.C = (A >= data ? 1 : 0);
     P.Flags.Z = (A == data ? 1 : 0);
     P.Flags.N = checkBit((A - data), 7);
 
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::CMP_ABS()
 {
-    uint16_t address = GetWordFromPC();
-    uint8_t data = GetByteFromAddress(address);
+    uint8_t extra_cycles = 0;
+    uint8_t data = GetDataAbsolute(&extra_cycles);
 
     P.Flags.C = (A >= data ? 1 : 0);
     P.Flags.Z = (A == data ? 1 : 0);
     P.Flags.N = checkBit((A - data), 7);
 
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::CMP_ABS_X()
 {
-    bool page_crossed = false;
+    uint8_t extra_cycles = 0;
+    uint8_t data = GetDataAbsoluteX(&extra_cycles);
 
-    uint16_t base_address = GetWordFromPC();
-    uint16_t final_address = base_address + X;
-
-    if ((final_address ^ base_address) >> 8)
-        page_crossed = true;
-
-    uint8_t data = GetByteFromAddress(final_address);
     P.Flags.C = (A >= data ? 1 : 0);
     P.Flags.Z = (A == data ? 1 : 0);
     P.Flags.N = checkBit((A - data), 7);
 
-    return (page_crossed ? 1 : 0);
+    return extra_cycles;
 }
 
 uint8_t CPU::CMP_ABS_Y()
 {
-    bool page_crossed = false;
+    uint8_t extra_cycles = 0;
+    uint8_t data = GetDataAbsoluteY(&extra_cycles);
 
-    uint16_t base_address = GetWordFromPC();
-    uint16_t final_address = base_address + Y;
-
-    if ((final_address ^ base_address) >> 8)
-        page_crossed = true;
-
-    uint8_t data = GetByteFromAddress(final_address);
     P.Flags.C = (A >= data ? 1 : 0);
     P.Flags.Z = (A == data ? 1 : 0);
     P.Flags.N = checkBit((A - data), 7);
 
-    return (page_crossed ? 1 : 0);
+    return extra_cycles;
 }
 
 uint8_t CPU::CMP_IND_X()
 {
-    uint16_t ZP_address = GetByteFromPC();
+    uint8_t extra_cycles = 0;
+    uint8_t data = GetDataIndirectX(&extra_cycles);
 
-    ZP_address += X;
-    ZP_address &= 0xFF; // This address require a truncation to 8 bits (zero page address)
-
-    uint16_t final_address = GetWordFromAddress(ZP_address);
-
-    uint8_t data = GetByteFromAddress(final_address);
     P.Flags.C = (A >= data ? 1 : 0);
     P.Flags.Z = (A == data ? 1 : 0);
     P.Flags.N = checkBit((A - data), 7);
 
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::CMP_IND_Y()
 {
-    bool page_crossed = false;
+    uint8_t extra_cycles = 0;
+    uint8_t data = GetDataIndirectY(&extra_cycles);
 
-    uint16_t ZP_address = GetByteFromPC();
-    uint16_t base_address = GetWordFromAddress(ZP_address);
-
-    uint16_t final_address = base_address + Y;
-    if ((final_address ^ base_address) >> 8)
-        page_crossed = true;
-
-    uint8_t data = GetByteFromAddress(final_address);
     P.Flags.C = (A >= data ? 1 : 0);
     P.Flags.Z = (A == data ? 1 : 0);
     P.Flags.N = checkBit((A - data), 7);
 
-    return (page_crossed ? 1 : 0);
+    return extra_cycles;
 }
 
 uint8_t CPU::CPX_IM()
 {
-    uint8_t data = GetByteFromPC();
+    uint8_t extra_cycles = 0;
+    uint8_t data = GetDataImmediate(&extra_cycles);
 
     P.Flags.C = (X >= data ? 1 : 0);
-    P.Flags.Z = (X== data ? 1 : 0);
+    P.Flags.Z = (X == data ? 1 : 0);
     P.Flags.N = checkBit((X - data), 7);
 
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::CPX_ZP()
 {
-    uint16_t ZP_address = GetByteFromPC();
-    uint8_t data = GetByteFromAddress(ZP_address);
+    uint8_t extra_cycles = 0;
+    uint8_t data = GetDataZeroPage(&extra_cycles);
 
     P.Flags.C = (X >= data ? 1 : 0);
     P.Flags.Z = (X == data ? 1 : 0);
     P.Flags.N = checkBit((X - data), 7);
 
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::CPX_ABS()
 {
-    uint16_t address = GetWordFromPC();
-    uint8_t data = GetByteFromAddress(address);
+    uint8_t extra_cycles = 0;
+    uint8_t data = GetDataAbsolute(&extra_cycles);
 
     P.Flags.C = (X >= data ? 1 : 0);
     P.Flags.Z = (X == data ? 1 : 0);
     P.Flags.N = checkBit((X - data), 7);
 
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::CPY_IM()
 {
-    uint8_t data = GetByteFromPC();
+    uint8_t extra_cycles = 0;
+    uint8_t data = GetDataImmediate(&extra_cycles);
 
     P.Flags.C = (Y >= data ? 1 : 0);
     P.Flags.Z = (Y == data ? 1 : 0);
     P.Flags.N = checkBit((Y - data), 7);
 
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::CPY_ZP()
 {
-    uint16_t ZP_address = GetByteFromPC();
-    uint8_t data = GetByteFromAddress(ZP_address);
+    uint8_t extra_cycles = 0;
+    uint8_t data = GetDataZeroPage(&extra_cycles);
 
     P.Flags.C = (Y >= data ? 1 : 0);
     P.Flags.Z = (Y == data ? 1 : 0);
     P.Flags.N = checkBit((Y - data), 7);
 
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::CPY_ABS()
 {
-    uint16_t address = GetWordFromPC();
-    uint8_t data = GetByteFromAddress(address);
+    uint8_t extra_cycles = 0;
+    uint8_t data = GetDataAbsolute(&extra_cycles);
 
     P.Flags.C = (Y >= data ? 1 : 0);
     P.Flags.Z = (Y == data ? 1 : 0);
     P.Flags.N = checkBit((Y - data), 7);
 
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::INC_ZP()
 {
-    uint16_t ZP_address = GetByteFromPC();
-    uint8_t data = GetByteFromAddress(ZP_address) + 1;
+    uint8_t extra_cycles = 0;
+    uint16_t ZP_address;
+    uint8_t data = GetDataZeroPage(&extra_cycles, &ZP_address) + 1;
     SetByte(ZP_address, data);
+    SetNegativeAndZeroFlags(data);
 
-    P.Flags.Z = (data == 0 ? 1 : 0);
-    P.Flags.N = checkBit(data, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::INC_ZP_X()
 {
-    uint16_t ZP_address = GetByteFromPC();
-
-    ZP_address += X;
-    ZP_address &= 0xFF;
-
-    uint8_t data = GetByteFromAddress(ZP_address) + 1;
+    uint8_t extra_cycles = 0;
+    uint16_t ZP_address;
+    uint8_t data = GetDataZeroPageX(&extra_cycles, &ZP_address) + 1;
     SetByte(ZP_address, data);
+    SetNegativeAndZeroFlags(data);
 
-    P.Flags.Z = (data == 0 ? 1 : 0);
-    P.Flags.N = checkBit(data, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::INC_ABS()
 {
-    uint16_t address = GetWordFromPC();
-
-    uint8_t data = GetByteFromAddress(address) + 1;
+    uint8_t extra_cycles = 0;
+    uint16_t address;
+    uint8_t data = GetDataAbsolute(&extra_cycles, &address) + 1;
     SetByte(address, data);
+    SetNegativeAndZeroFlags(data);
 
-    P.Flags.Z = (data == 0 ? 1 : 0);
-    P.Flags.N = checkBit(data, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::INC_ABS_X()
 {
-    bool page_crossed = false;
+    uint8_t extra_cycles = 0;
+    uint16_t address;
+    uint8_t data = GetDataAbsoluteX(&extra_cycles, &address) + 1;
+    SetByte(address, data);
+    SetNegativeAndZeroFlags(data);
 
-    uint16_t base_address = GetWordFromPC();
-    uint16_t final_address = base_address + X;
-
-    if ((final_address ^ base_address) >> 8)
-        page_crossed = true;
-
-    uint8_t data = GetByteFromAddress(final_address) + 1;
-    SetByte(final_address, data);
-
-    P.Flags.Z = (data == 0 ? 1 : 0);
-    P.Flags.N = checkBit(data, 7);
-
-    return (page_crossed ? 1 : 0);
+    return extra_cycles;
 }
 
 uint8_t CPU::INX()
 {
     ++X;
-    P.Flags.Z = (X == 0 ? 1 : 0);
-    P.Flags.N = checkBit(X, 7);
+    SetNegativeAndZeroFlags(X);
 
     return 0;
 }
@@ -1463,77 +1273,59 @@ uint8_t CPU::INX()
 uint8_t CPU::INY()
 {
     ++Y;
-    P.Flags.Z = (Y == 0 ? 1 : 0);
-    P.Flags.N = checkBit(Y, 7);
+    SetNegativeAndZeroFlags(Y);
 
     return 0;
 }
 
 uint8_t CPU::DEC_ZP()
 {
-    uint16_t ZP_address = GetByteFromPC();
-    uint8_t data = GetByteFromAddress(ZP_address) - 1;
+    uint8_t extra_cycles = 0;
+    uint16_t ZP_address;
+    uint8_t data = GetDataZeroPage(&extra_cycles, &ZP_address) - 1;
     SetByte(ZP_address, data);
+    SetNegativeAndZeroFlags(data);
 
-    P.Flags.Z = (data == 0 ? 1 : 0);
-    P.Flags.N = checkBit(data, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::DEC_ZP_X()
 {
-    uint16_t ZP_address = GetByteFromPC();
-
-    ZP_address += X;
-    ZP_address &= 0xFF;
-
-    uint8_t data = GetByteFromAddress(ZP_address) - 1;
+    uint8_t extra_cycles = 0;
+    uint16_t ZP_address;
+    uint8_t data = GetDataZeroPageX(&extra_cycles, &ZP_address) - 1;
     SetByte(ZP_address, data);
+    SetNegativeAndZeroFlags(data);
 
-    P.Flags.Z = (data == 0 ? 1 : 0);
-    P.Flags.N = checkBit(data, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::DEC_ABS()
 {
-    uint16_t address = GetWordFromPC();
-
-    uint8_t data = GetByteFromAddress(address) - 1;
+    uint8_t extra_cycles = 0;
+    uint16_t address;
+    uint8_t data = GetDataAbsolute(&extra_cycles, &address) - 1;
     SetByte(address, data);
+    SetNegativeAndZeroFlags(data);
 
-    P.Flags.Z = (data == 0 ? 1 : 0);
-    P.Flags.N = checkBit(data, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::DEC_ABS_X()
 {
-    bool page_crossed = false;
+    uint8_t extra_cycles = 0;
+    uint16_t address;
+    uint8_t data = GetDataAbsoluteX(&extra_cycles, &address) - 1;
+    SetByte(address, data);
+    SetNegativeAndZeroFlags(data);
 
-    uint16_t base_address = GetWordFromPC();
-    uint16_t final_address = base_address + X;
-
-    if ((final_address ^ base_address) >> 8)
-        page_crossed = true;
-
-    uint8_t data = GetByteFromAddress(final_address) - 1;
-    SetByte(final_address, data);
-
-    P.Flags.Z = (data == 0 ? 1 : 0);
-    P.Flags.N = checkBit(data, 7);
-
-    return (page_crossed ? 1 : 0);
+    return extra_cycles;
 }
 
 uint8_t CPU::DEX()
 {
     --X;
-    P.Flags.Z = (X == 0 ? 1 : 0);
-    P.Flags.N = checkBit(X, 7);
+    SetNegativeAndZeroFlags(X);
 
     return 0;
 }
@@ -1541,8 +1333,7 @@ uint8_t CPU::DEX()
 uint8_t CPU::DEY()
 {
     --Y;
-    P.Flags.Z = (Y == 0 ? 1 : 0);
-    P.Flags.N = checkBit(Y, 7);
+    SetNegativeAndZeroFlags(Y);
 
     return 0;
 }
@@ -1551,162 +1342,122 @@ uint8_t CPU::ASL_ACC()
 {
     P.Flags.C = checkBit(A, 7);
     A <<= 1;
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
+    SetNegativeAndZeroFlags(A);
 
     return 0;
 }
 
 uint8_t CPU::ASL_ZP()
 {
-    uint16_t ZP_address = GetByteFromPC();
-    uint8_t data = GetByteFromAddress(ZP_address);
-
+    uint8_t extra_cycles = 0;
+    uint16_t ZP_address;
+    uint8_t data = GetDataZeroPage(&extra_cycles, &ZP_address);
     P.Flags.C = checkBit(data, 7);
     data <<= 1;
     SetByte(ZP_address, data);
+    SetNegativeAndZeroFlags(data);
 
-    P.Flags.Z = (data == 0 ? 1 : 0);
-    P.Flags.N = checkBit(data, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::ASL_ZP_X()
 {
-    uint16_t ZP_address = GetByteFromPC();
-
-    ZP_address += X;
-    ZP_address &= 0xFF;
-
-    uint8_t data = GetByteFromAddress(ZP_address);
-
+    uint8_t extra_cycles = 0;
+    uint16_t ZP_address;
+    uint8_t data = GetDataZeroPageX(&extra_cycles, &ZP_address);
     P.Flags.C = checkBit(data, 7);
     data <<= 1;
     SetByte(ZP_address, data);
+    SetNegativeAndZeroFlags(data);
 
-    P.Flags.Z = (data == 0 ? 1 : 0);
-    P.Flags.N = checkBit(data, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::ASL_ABS()
 {
-    uint16_t address = GetWordFromPC();
-    uint8_t data = GetByteFromAddress(address);
-
+    uint8_t extra_cycles = 0;
+    uint16_t address;
+    uint8_t data = GetDataAbsolute(&extra_cycles, &address);
     P.Flags.C = checkBit(data, 7);
     data <<= 1;
     SetByte(address, data);
+    SetNegativeAndZeroFlags(data);
 
-    P.Flags.Z = (data == 0 ? 1 : 0);
-    P.Flags.N = checkBit(data, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::ASL_ABS_X()
 {
-    bool page_crossed = false;
-
-    uint16_t base_address = GetWordFromPC();
-    uint16_t final_address = base_address + X;
-
-    if ((final_address ^ base_address) >> 8)
-        page_crossed = true;
-
-    uint8_t data = GetByteFromAddress(final_address);
-
+    uint8_t extra_cycles = 0;
+    uint16_t address;
+    uint8_t data = GetDataAbsoluteX(&extra_cycles, &address);
     P.Flags.C = checkBit(data, 7);
     data <<= 1;
-    SetByte(final_address, data);
+    SetByte(address, data);
+    SetNegativeAndZeroFlags(data);
 
-    P.Flags.Z = (data == 0 ? 1 : 0);
-    P.Flags.N = checkBit(data, 7);
-
-    return (page_crossed ? 1 : 0);
+    return extra_cycles;
 }
 
 uint8_t CPU::LSR_ACC()
 {
     P.Flags.C = checkBit(A, 0);
     A >>= 1;
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
+    SetNegativeAndZeroFlags(A);
 
     return 0;
 }
 
 uint8_t CPU::LSR_ZP()
 {
-    uint16_t ZP_address = GetByteFromPC();
-    uint8_t data = GetByteFromAddress(ZP_address);
-
+    uint8_t extra_cycles = 0;
+    uint16_t ZP_address;
+    uint8_t data = GetDataZeroPage(&extra_cycles, &ZP_address);
     P.Flags.C = checkBit(data, 0);
     data >>= 1;
     SetByte(ZP_address, data);
+    SetNegativeAndZeroFlags(data);
 
-    P.Flags.Z = (data == 0 ? 1 : 0);
-    P.Flags.N = checkBit(data, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::LSR_ZP_X()
 {
-    uint16_t ZP_address = GetByteFromPC();
-
-    ZP_address += X;
-    ZP_address &= 0xFF;
-
-    uint8_t data = GetByteFromAddress(ZP_address);
-
+    uint8_t extra_cycles = 0;
+    uint16_t ZP_address;
+    uint8_t data = GetDataZeroPageX(&extra_cycles, &ZP_address);
     P.Flags.C = checkBit(data, 0);
     data >>= 1;
     SetByte(ZP_address, data);
+    SetNegativeAndZeroFlags(data);
 
-    P.Flags.Z = (data == 0 ? 1 : 0);
-    P.Flags.N = checkBit(data, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::LSR_ABS()
 {
-    uint16_t address = GetWordFromPC();
-    uint8_t data = GetByteFromAddress(address);
-
+    uint8_t extra_cycles = 0;
+    uint16_t address;
+    uint8_t data = GetDataAbsolute(&extra_cycles, &address);
     P.Flags.C = checkBit(data, 0);
     data >>= 1;
     SetByte(address, data);
+    SetNegativeAndZeroFlags(data);
 
-    P.Flags.Z = (data == 0 ? 1 : 0);
-    P.Flags.N = checkBit(data, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::LSR_ABS_X()
 {
-    bool page_crossed = false;
-
-    uint16_t base_address = GetWordFromPC();
-    uint16_t final_address = base_address + X;
-
-    if ((final_address ^ base_address) >> 8)
-        page_crossed = true;
-
-    uint8_t data = GetByteFromAddress(final_address);
-
+    uint8_t extra_cycles = 0;
+    uint16_t address;
+    uint8_t data = GetDataAbsoluteX(&extra_cycles, &address);
     P.Flags.C = checkBit(data, 0);
     data >>= 1;
-    SetByte(final_address, data);
+    SetByte(address, data);
+    SetNegativeAndZeroFlags(data);
 
-    P.Flags.Z = (data == 0 ? 1 : 0);
-    P.Flags.N = checkBit(data, 7);
-
-    return (page_crossed ? 1 : 0);
+    return extra_cycles;
 }
 
 uint8_t CPU::ROL_ACC()
@@ -1717,97 +1468,73 @@ uint8_t CPU::ROL_ACC()
     if (old_carry)
         setBit(A, 0);
 
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
+    SetNegativeAndZeroFlags(A);
 
     return 0;
 }
 
 uint8_t CPU::ROL_ZP()
 {
-    uint16_t ZP_address = GetByteFromPC();
-    uint8_t data = GetByteFromAddress(ZP_address);
+    uint8_t extra_cycles = 0;
+    uint16_t ZP_address;
+    uint8_t data = GetDataZeroPage(&extra_cycles, &ZP_address);
     uint8_t old_carry = P.Flags.C;
-
     P.Flags.C = checkBit(data, 7);
     data <<= 1;
     if (old_carry)
         setBit(data, 0);
-
     SetByte(ZP_address, data);
+    SetNegativeAndZeroFlags(data);
 
-    P.Flags.Z = (data == 0 ? 1 : 0);
-    P.Flags.N = checkBit(data, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::ROL_ZP_X()
 {
-    uint16_t ZP_address = GetByteFromPC();
-
-    ZP_address += X;
-    ZP_address &= 0xFF;
-
-    uint8_t data = GetByteFromAddress(ZP_address);
+    uint8_t extra_cycles = 0;
+    uint16_t ZP_address;
+    uint8_t data = GetDataZeroPageX(&extra_cycles, &ZP_address);
     uint8_t old_carry = P.Flags.C;
-
     P.Flags.C = checkBit(data, 7);
     data <<= 1;
     if (old_carry)
         setBit(data, 0);
-
     SetByte(ZP_address, data);
+    SetNegativeAndZeroFlags(data);
 
-    P.Flags.Z = (data == 0 ? 1 : 0);
-    P.Flags.N = checkBit(data, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::ROL_ABS()
 {
-    uint16_t address = GetWordFromPC();
-    uint8_t data = GetByteFromAddress(address);
+    uint8_t extra_cycles = 0;
+    uint16_t address;
+    uint8_t data = GetDataAbsolute(&extra_cycles, &address);
     uint8_t old_carry = P.Flags.C;
-
     P.Flags.C = checkBit(data, 7);
     data <<= 1;
     if (old_carry)
         setBit(data, 0);
-
     SetByte(address, data);
+    SetNegativeAndZeroFlags(data);
 
-    P.Flags.Z = (data == 0 ? 1 : 0);
-    P.Flags.N = checkBit(data, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::ROL_ABS_X()
 {
-    bool page_crossed = false;
-
-    uint16_t base_address = GetWordFromPC();
-    uint16_t final_address = base_address + X;
-
-    if ((final_address ^ base_address) >> 8)
-        page_crossed = true;
-
-    uint8_t data = GetByteFromAddress(final_address);
+    uint8_t extra_cycles = 0;
+    uint16_t address;
+    uint8_t data = GetDataAbsoluteX(&extra_cycles, &address);
     uint8_t old_carry = P.Flags.C;
-
     P.Flags.C = checkBit(data, 7);
     data <<= 1;
     if (old_carry)
         setBit(data, 0);
+    SetByte(address, data);
+    SetNegativeAndZeroFlags(data);
 
-    SetByte(final_address, data);
-
-    P.Flags.Z = (data == 0 ? 1 : 0);
-    P.Flags.N = checkBit(data, 7);
-
-    return (page_crossed ? 1 : 0);
+    return extra_cycles;
 }
 
 uint8_t CPU::ROR_ACC()
@@ -1818,97 +1545,73 @@ uint8_t CPU::ROR_ACC()
     if (old_carry)
         setBit(A, 7);
 
-    P.Flags.Z = (A == 0 ? 1 : 0);
-    P.Flags.N = checkBit(A, 7);
+    SetNegativeAndZeroFlags(A);
 
     return 0;
 }
 
 uint8_t CPU::ROR_ZP()
 {
-    uint16_t ZP_address = GetByteFromPC();
-    uint8_t data = GetByteFromAddress(ZP_address);
+    uint8_t extra_cycles = 0;
+    uint16_t ZP_address;
+    uint8_t data = GetDataZeroPage(&extra_cycles, &ZP_address);
     uint8_t old_carry = P.Flags.C;
-
     P.Flags.C = checkBit(data, 0);
     data >>= 1;
     if (old_carry)
         setBit(data, 7);
-
     SetByte(ZP_address, data);
+    SetNegativeAndZeroFlags(data);
 
-    P.Flags.Z = (data == 0 ? 1 : 0);
-    P.Flags.N = checkBit(data, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::ROR_ZP_X()
 {
-    uint16_t ZP_address = GetByteFromPC();
-
-    ZP_address += X;
-    ZP_address &= 0xFF;
-
-    uint8_t data = GetByteFromAddress(ZP_address);
+    uint8_t extra_cycles = 0;
+    uint16_t ZP_address;
+    uint8_t data = GetDataZeroPageX(&extra_cycles, &ZP_address);
     uint8_t old_carry = P.Flags.C;
-
     P.Flags.C = checkBit(data, 0);
     data >>= 1;
     if (old_carry)
         setBit(data, 7);
-
     SetByte(ZP_address, data);
+    SetNegativeAndZeroFlags(data);
 
-    P.Flags.Z = (data == 0 ? 1 : 0);
-    P.Flags.N = checkBit(data, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::ROR_ABS()
 {
-    uint16_t address = GetWordFromPC();
-    uint8_t data = GetByteFromAddress(address);
+    uint8_t extra_cycles = 0;
+    uint16_t address;
+    uint8_t data = GetDataAbsolute(&extra_cycles, &address);
     uint8_t old_carry = P.Flags.C;
-
     P.Flags.C = checkBit(data, 0);
     data >>= 1;
     if (old_carry)
         setBit(data, 7);
-
     SetByte(address, data);
+    SetNegativeAndZeroFlags(data);
 
-    P.Flags.Z = (data == 0 ? 1 : 0);
-    P.Flags.N = checkBit(data, 7);
-
-    return 0;
+    return extra_cycles;
 }
 
 uint8_t CPU::ROR_ABS_X()
 {
-    bool page_crossed = false;
-
-    uint16_t base_address = GetWordFromPC();
-    uint16_t final_address = base_address + X;
-
-    if ((final_address ^ base_address) >> 8)
-        page_crossed = true;
-
-    uint8_t data = GetByteFromAddress(final_address);
+    uint8_t extra_cycles = 0;
+    uint16_t address;
+    uint8_t data = GetDataAbsoluteX(&extra_cycles, &address);
     uint8_t old_carry = P.Flags.C;
-
     P.Flags.C = checkBit(data, 0);
     data >>= 1;
     if (old_carry)
         setBit(data, 7);
+    SetByte(address, data);
+    SetNegativeAndZeroFlags(data);
 
-    SetByte(final_address, data);
-
-    P.Flags.Z = (data == 0 ? 1 : 0);
-    P.Flags.N = checkBit(data, 7);
-
-    return (page_crossed ? 1 : 0);
+    return extra_cycles;
 }
 
 uint8_t CPU::JMP_ABS()

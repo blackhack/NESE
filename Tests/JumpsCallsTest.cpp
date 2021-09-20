@@ -28,7 +28,7 @@ TEST(JumpsCallsTest, JMP_ABS) {
     mem[1] = 0xFC;
     mem[2] = 0xFF;
 
-    uint32_t cycles = cpu.Execute(1);
+    uint32_t cycles = cpu.Run(1);
     EXPECT_EQ(cpu.PC, 0xFFFC);
     EXPECT_EQ(cycles, 3);
 }
@@ -43,7 +43,7 @@ TEST(JumpsCallsTest, JMP_IND) {
     mem[0x10ED] = 0xFC;
     mem[0x10EE] = 0xFF;
 
-    uint32_t cycles = cpu.Execute(1);
+    uint32_t cycles = cpu.Run(1);
     EXPECT_EQ(cpu.PC, 0xFFFC);
     EXPECT_EQ(cycles, 5);
 }
@@ -57,11 +57,11 @@ TEST(JumpsCallsTest, JSR_RTS) {
     mem[2] = 0xAF;
     mem[0xAF21] = static_cast<uint8_t>(Opcode::RTS);
 
-    uint32_t cycles = cpu.Execute(1);
+    uint32_t cycles = cpu.Run(1);
     EXPECT_EQ(cpu.PC, 0xAF21);
     EXPECT_EQ(cycles, 6);
 
-    cycles = cpu.Execute(1);
+    cycles = cpu.Run(1);
     EXPECT_EQ(cpu.PC, 3);
     EXPECT_EQ(cycles, 6);
 }

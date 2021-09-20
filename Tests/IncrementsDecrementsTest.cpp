@@ -32,11 +32,11 @@ TEST(IncrementsDecrementsTest, INC_ZP_X) {
     mem[2] = static_cast<uint8_t>(Opcode::INC_ZP_X);
     mem[3] = 0x80;
 
-    uint32_t cycles = cpu.Execute(1);
+    uint32_t cycles = cpu.Run(1);
     EXPECT_EQ(mem[0x8F], 101);
     EXPECT_EQ(cycles, 6);
 
-    cycles = cpu.Execute(1);
+    cycles = cpu.Run(1);
     EXPECT_EQ(mem[0x8F], 102);
     EXPECT_EQ(cycles, 6);
 }
@@ -53,7 +53,7 @@ TEST(IncrementsDecrementsTest, DEC_ABS_X) {
     //1FCC + 01 = 1FCD
     mem[0x1FCD] = 100;
 
-    uint32_t cycles = cpu.Execute(1);
+    uint32_t cycles = cpu.Run(1);
     EXPECT_EQ(mem[0x1FCD], 99);
     EXPECT_EQ(cycles, 7);
 
@@ -61,7 +61,7 @@ TEST(IncrementsDecrementsTest, DEC_ABS_X) {
     mem[4] = 0xCC;
     mem[5] = 0x1F;
 
-    cycles = cpu.Execute(1);
+    cycles = cpu.Run(1);
     EXPECT_EQ(mem[0x1FCD], 98);
     EXPECT_EQ(cycles, 7);
 }
@@ -74,11 +74,11 @@ TEST(IncrementsDecrementsTest, INX_DEX) {
     mem[1] = static_cast<uint8_t>(Opcode::DEX);
     cpu.X = 100;
 
-    uint32_t cycles = cpu.Execute(1);
+    uint32_t cycles = cpu.Run(1);
     EXPECT_EQ(cpu.X, 101);
     EXPECT_EQ(cycles, 2);
 
-    cycles = cpu.Execute(1);
+    cycles = cpu.Run(1);
     EXPECT_EQ(cpu.X, 100);
     EXPECT_EQ(cycles, 2);
 }
@@ -91,11 +91,11 @@ TEST(IncrementsDecrementsTest, INY_DEY) {
     mem[1] = static_cast<uint8_t>(Opcode::DEY);
     cpu.Y = 255;
 
-    uint32_t cycles = cpu.Execute(1);
+    uint32_t cycles = cpu.Run(1);
     EXPECT_EQ(cpu.Y, 0);
     EXPECT_EQ(cycles, 2);
 
-    cycles = cpu.Execute(1);
+    cycles = cpu.Run(1);
     EXPECT_EQ(cpu.Y, 255);
     EXPECT_EQ(cycles, 2);
 }

@@ -31,13 +31,13 @@ TEST(SystemFunctions, BRK_RTI) {
     mem[0xFFFF] = 0xAE;
     mem[0xAE25] = static_cast<uint8_t>(Opcode::RTI);
 
-    uint32_t cycles = cpu.Execute(1);
+    uint32_t cycles = cpu.Run(1);
     EXPECT_EQ(cpu.PC, 0xAE25);
     EXPECT_EQ(cycles, 7);
 
     cpu.P.Pbyte = 0b00110100;
 
-    cycles = cpu.Execute(1);
+    cycles = cpu.Run(1);
     EXPECT_EQ(cpu.PC, 2);
     EXPECT_EQ(cpu.P.Pbyte, 0b11000001);
     EXPECT_EQ(cycles, 6);
@@ -57,7 +57,7 @@ TEST(SystemFunctions, NOP) {
     mem[7] = static_cast<uint8_t>(Opcode::NOP);
     mem[8] = static_cast<uint8_t>(Opcode::NOP);
 
-    uint32_t cycles = cpu.Execute(9);
+    uint32_t cycles = cpu.Run(9);
 
     EXPECT_EQ(cycles, 18);
 }

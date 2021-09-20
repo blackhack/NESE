@@ -27,7 +27,7 @@ TEST(RegisterTransferTest, TAX) {
     mem[0] = static_cast<uint8_t>(Opcode::TAX);
     cpu.A = 0x21;
 
-    uint32_t cycles = cpu.Execute(1);
+    uint32_t cycles = cpu.Run(1);
     EXPECT_EQ(cpu.A, cpu.X);
     EXPECT_EQ(cycles, 2);
 }
@@ -39,7 +39,7 @@ TEST(RegisterTransferTest, TAY) {
     mem[0] = static_cast<uint8_t>(Opcode::TAY);
     cpu.Y = 0x22;
 
-    uint32_t cycles = cpu.Execute(1);
+    uint32_t cycles = cpu.Run(1);
     EXPECT_EQ(cpu.A, cpu.Y);
     EXPECT_EQ(cycles, 2);
 }
@@ -51,7 +51,7 @@ TEST(RegisterTransferTest, TXA) {
     mem[0] = static_cast<uint8_t>(Opcode::TXA);
     cpu.X = 0xCF;
 
-    uint32_t cycles = cpu.Execute(1);
+    uint32_t cycles = cpu.Run(1);
     EXPECT_EQ(cpu.A, cpu.X);
     EXPECT_EQ(cycles, 2);
 }
@@ -63,7 +63,7 @@ TEST(RegisterTransferTest, TYA) {
     mem[0] = static_cast<uint8_t>(Opcode::TYA);
     cpu.Y = 0xFF;
 
-    uint32_t cycles = cpu.Execute(1);
+    uint32_t cycles = cpu.Run(1);
     EXPECT_EQ(cpu.A, cpu.Y);
     EXPECT_EQ(cycles, 2);
 }

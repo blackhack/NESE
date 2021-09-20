@@ -26,7 +26,7 @@ int main()
     ram.LoadFile("D:/Jose/Development/Learning Cpp/NES/6502_65C02_functional_tests-master/6502_functional_test.bin");
     CPU cpu(ram);
     cpu.PC = 0x0400;
-    cpu.Execute(0xFFFFFFFF);
+    cpu.Run(0xFFFFFFFF);
 
     return 0;
 }

@@ -30,7 +30,7 @@ TEST(LogicalTest, AND_ZP_X) {
     mem[0x8F] = 0xE9;
     cpu.A = 0x73;
 
-    uint32_t cycles = cpu.Execute(1);
+    uint32_t cycles = cpu.Run(1);
     EXPECT_EQ(cpu.A, 0xE9 & 0x73);
     EXPECT_EQ(cycles, 4);
 
@@ -40,7 +40,7 @@ TEST(LogicalTest, AND_ZP_X) {
     mem[0x7F] = 0x85;
     cpu.A = 0xD6;
 
-    cycles = cpu.Execute(1);
+    cycles = cpu.Run(1);
     EXPECT_EQ(cpu.A, 0x85 & 0xD6);
     EXPECT_EQ(cycles, 4);
 }
@@ -58,7 +58,7 @@ TEST(LogicalTest, EOR_ABS_Y) {
     mem[0x1FCD] = 0x55;
     cpu.A = 0xD6;
 
-    uint32_t cycles = cpu.Execute(1);
+    uint32_t cycles = cpu.Run(1);
     EXPECT_EQ(cpu.A, 0x55 ^ 0xD6);
     EXPECT_EQ(cycles, 4);
 
@@ -71,7 +71,7 @@ TEST(LogicalTest, EOR_ABS_Y) {
     mem[0x2000] = 0x44;
     cpu.A = 0xE7;
 
-    cycles = cpu.Execute(1);
+    cycles = cpu.Run(1);
     EXPECT_EQ(cpu.A, 0x44 ^ 0xE7);
     EXPECT_EQ(cycles, 5);
 }
@@ -88,7 +88,7 @@ TEST(LogicalTest, ORA_IND_X) {
     cpu.X = 0x05;
     cpu.A = 0x7A;
 
-    uint32_t cycles = cpu.Execute(1);
+    uint32_t cycles = cpu.Run(1);
     EXPECT_EQ(cpu.A, 0x6E | 0x7A);
     EXPECT_EQ(cycles, 6);
 }
@@ -103,7 +103,7 @@ TEST(LogicalTest, BIT_ABS) {
     mem[0x2415] = 0x33; 
     cpu.A = 0xCC;
 
-    uint32_t cycles = cpu.Execute(1);
+    uint32_t cycles = cpu.Run(1);
     EXPECT_EQ(cpu.A, 0xCC);
     EXPECT_TRUE(cpu.P.Flags.Z);
     EXPECT_FALSE(cpu.P.Flags.V);
@@ -116,7 +116,7 @@ TEST(LogicalTest, BIT_ABS) {
     mem[0x3517] = 0x7C;
     cpu.A = 0x4E;
 
-    cycles = cpu.Execute(1);
+    cycles = cpu.Run(1);
     EXPECT_EQ(cpu.A, 0x4E);
     EXPECT_FALSE(cpu.P.Flags.Z);
     EXPECT_TRUE(cpu.P.Flags.V);

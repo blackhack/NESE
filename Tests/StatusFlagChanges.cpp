@@ -27,7 +27,7 @@ TEST(StatusFlagChanges, CLC) {
     cpu.P.Flags.C = 1;
     mem[0] = static_cast<uint8_t>(Opcode::CLC);
 
-    uint32_t cycles = cpu.Execute(1);
+    uint32_t cycles = cpu.Run(1);
     EXPECT_EQ(cpu.P.Flags.C, 0);
     EXPECT_EQ(cycles, 2);
 }
@@ -39,7 +39,7 @@ TEST(StatusFlagChanges, SEC) {
     cpu.P.Flags.C = 0;
     mem[0] = static_cast<uint8_t>(Opcode::SEC);
 
-    uint32_t cycles = cpu.Execute(1);
+    uint32_t cycles = cpu.Run(1);
     EXPECT_EQ(cpu.P.Flags.C, 1);
     EXPECT_EQ(cycles, 2);
 }

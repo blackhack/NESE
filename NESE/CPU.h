@@ -34,7 +34,7 @@ public:
 
     void Reset();
 
-    /* Registers Set*/
+    /* REGISTERS */
     uint16_t PC; // ProgramCounter
     uint8_t SP; // StackPointer
     uint8_t A; // Accumulator
@@ -58,21 +58,49 @@ public:
         uint8_t Pbyte;     // Direct access to all the flags as a single byte
     } P;
 
-    uint32_t Execute(uint32_t instructions_to_execute);
+    uint32_t Run(uint32_t instructions_to_execute);
 
+    /* BUS FUNCTIONS */
     uint8_t CPU::GetByteFromPC();
     uint16_t CPU::GetWordFromPC();
     uint8_t CPU::GetByteFromAddress(uint16_t address);
     uint16_t CPU::GetWordFromAddress(uint16_t address);
-
     void SetByte(uint16_t address, uint8_t data);
     void SetWord(uint16_t address, uint16_t data);
 
+    /* STACK FUNCTIONS */
     void PushByteToStack(uint8_t data);
     void PushWordToStack(uint16_t data);
     uint8_t PullByteFromStack();
     uint16_t PullWordFromStack();
 
+    /** ADDRESSING MODE FUNCTIONS
+    *  Return a byte with the data in the memory location depending on the addressing mode
+    *  Both parameters are optional
+    *  extra_cycles: Contains the extra amount of cycles in case of page crossing (Only useful with AbsX, AbsY and IndirectY)
+    *  obtained_address: Contains the actual address from where the returned data comes from
+    **/
+    uint8_t GetDataImmediate(uint8_t* extra_cycles = nullptr, uint16_t* obtained_address = nullptr);
+    uint8_t GetDataZeroPage(uint8_t* extra_cycles = nullptr, uint16_t* obtained_address = nullptr);
+    uint8_t GetDataZeroPageX(uint8_t* extra_cycles = nullptr, uint16_t* obtained_address = nullptr);
+    uint8_t GetDataZeroPageY(uint8_t* extra_cycles = nullptr, uint16_t* obtained_address = nullptr);
+    uint8_t GetDataAbsolute(uint8_t* extra_cycles = nullptr, uint16_t* obtained_address = nullptr);
+    uint8_t GetDataAbsoluteX(uint8_t* extra_cycles = nullptr, uint16_t* obtained_address = nullptr);
+    uint8_t GetDataAbsoluteY(uint8_t* extra_cycles = nullptr, uint16_t* obtained_address = nullptr);
+    uint8_t GetDataIndirectX(uint8_t* extra_cycles = nullptr, uint16_t* obtained_address = nullptr);
+    uint8_t GetDataIndirectY(uint8_t* extra_cycles = nullptr, uint16_t* obtained_address = nullptr);
+
+
+    /* HELPER FUNCTIONS */
+
+    //Sets P.Flags.N and P.Flags.Z
+    //Used in most functions, there are some exceptions
+    void SetNegativeAndZeroFlags(uint8_t data);
+
+    uint8_t ADC(uint8_t a, uint8_t b);
+    uint8_t SBC(uint8_t a, uint8_t b);
+
+    /* OPCODES HANDLER */
     uint8_t LDA_IM();
     uint8_t LDA_ZP();
     uint8_t LDA_ZP_X();
@@ -151,9 +179,6 @@ public:
 
     uint8_t BIT_ZP();
     uint8_t BIT_ABS();
-
-    uint8_t ADC(uint8_t a, uint8_t b);
-    uint8_t SBC(uint8_t a, uint8_t b);
 
     uint8_t ADC_IM();
     uint8_t ADC_ZP();

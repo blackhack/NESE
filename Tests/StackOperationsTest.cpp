@@ -27,7 +27,7 @@ TEST(StackOperationsTest, TSX) {
     mem[0] = static_cast<uint8_t>(Opcode::TSX);
     cpu.SP = 0xF1;
 
-    uint32_t cycles = cpu.Execute(1);
+    uint32_t cycles = cpu.Run(1);
     EXPECT_EQ(cpu.SP, cpu.X);
     EXPECT_EQ(cycles, 2);
 }
@@ -39,7 +39,7 @@ TEST(StackOperationsTest, TXS) {
     mem[0] = static_cast<uint8_t>(Opcode::TXS);
     cpu.X = 0xEC;
 
-    uint32_t cycles = cpu.Execute(1);
+    uint32_t cycles = cpu.Run(1);
     EXPECT_EQ(cpu.SP, cpu.X);
     EXPECT_EQ(cycles, 2);
 }
@@ -53,12 +53,12 @@ TEST(StackOperationsTest, PHA_PLA) {
 
     cpu.A = 0xFA;
 
-    uint32_t cycles = cpu.Execute(1);
+    uint32_t cycles = cpu.Run(1);
     EXPECT_EQ(cycles, 3);
 
     cpu.A = 0x00; // PLA should set it from data in stack
 
-    cycles = cpu.Execute(1);
+    cycles = cpu.Run(1);
     EXPECT_EQ(cpu.A, 0xFA);
     EXPECT_EQ(cycles, 4);
 }
@@ -72,13 +72,13 @@ TEST(StackOperationsTest, PHP_PLP) {
 
     cpu.P.Pbyte = 0b10110101;
 
-    uint32_t cycles = cpu.Execute(1);
+    uint32_t cycles = cpu.Run(1);
     EXPECT_EQ(cycles, 3);
 
     cpu.P.Pbyte = 0b00000000; // PLP should set it from data in stack
                                  // bits 4 and 5 are unset
 
-    cycles = cpu.Execute(1);
+    cycles = cpu.Run(1);
     EXPECT_EQ(cpu.P.Pbyte, 0b10000101);
     EXPECT_EQ(cycles, 4);
 }

@@ -35,7 +35,7 @@ TEST(ArithmeticTest, ADC_ABS) {
     mem[2] = 0x80;
     mem[0x8000] = 127;
 
-    uint32_t cycles = cpu.Execute(1);
+    uint32_t cycles = cpu.Run(1);
 
     EXPECT_EQ(cycles, 4);
     EXPECT_EQ(cpu.A, uint8_t(-2));
@@ -59,7 +59,7 @@ TEST(ArithmeticTest, SBC_ABS) {
     mem[2] = 0x80;
     mem[0x8000] = 127;
 
-    uint32_t cycles = cpu.Execute(1);
+    uint32_t cycles = cpu.Run(1);
 
     EXPECT_EQ(cycles, 4);
     EXPECT_EQ(cpu.A, 0);
@@ -80,7 +80,7 @@ TEST(ArithmeticTest, CMP_IM) {
     mem[0] = static_cast<uint8_t>(Opcode::CMP_IM);
     mem[1] = 127;
 
-    uint32_t cycles = cpu.Execute(1);
+    uint32_t cycles = cpu.Run(1);
 
     EXPECT_EQ(cycles, 2);
     EXPECT_EQ(cpu.A, 127);
@@ -101,7 +101,7 @@ TEST(ArithmeticTest, CPX_ZP) {
     mem[1] = 0x25;
     mem[0x0025] = 127;
 
-    uint32_t cycles = cpu.Execute(1);
+    uint32_t cycles = cpu.Run(1);
 
     EXPECT_EQ(cycles, 3);
     EXPECT_EQ(cpu.X, 0);
@@ -122,7 +122,7 @@ TEST(ArithmeticTest, CPY_ZP) {
     mem[1] = 0x25;
     mem[0x0025] = 100;
 
-    uint32_t cycles = cpu.Execute(1);
+    uint32_t cycles = cpu.Run(1);
 
     EXPECT_EQ(cycles, 3);
     EXPECT_EQ(cpu.Y, 105);

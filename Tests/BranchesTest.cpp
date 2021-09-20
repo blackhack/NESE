@@ -28,7 +28,7 @@ TEST(BranchesTest, BCC_REL) {
     mem[0] = static_cast<uint8_t>(Opcode::BCC_REL);
     mem[1] = 0x78;
 
-    uint32_t cycles = cpu.Execute(1);
+    uint32_t cycles = cpu.Run(1);
     EXPECT_EQ(cpu.PC, 2+0x78);
     EXPECT_EQ(cycles, 3);
 }
@@ -42,7 +42,7 @@ TEST(BranchesTest, BVS_REL) {
     mem[0xFD] = static_cast<uint8_t>(Opcode::BVS_REL);
     mem[0xFE] = 0x78;
 
-    uint32_t cycles = cpu.Execute(1);
+    uint32_t cycles = cpu.Run(1);
     EXPECT_EQ(cpu.PC, 0xFF + 0x78);
     EXPECT_EQ(cycles, 4);
 }
@@ -56,7 +56,7 @@ TEST(BranchesTest, BNE_REL) {
     mem[0xFD] = static_cast<uint8_t>(Opcode::BNE_REL);
     mem[0xFE] = 0x88; // This is taken as a signed byte, si 0x88 is -120 or -0x78
 
-    uint32_t cycles = cpu.Execute(1);
+    uint32_t cycles = cpu.Run(1);
     EXPECT_EQ(cpu.PC, 0xFF - 0x78);
     EXPECT_EQ(cycles, 3);
 }
