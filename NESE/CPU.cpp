@@ -21,24 +21,10 @@
 
 CPU::CPU(Memory& mem) : memory(mem)
 {
-    Reset();
-}
-
-void CPU::Reset()
-{
-    PC = GetWordFromAddress(0xFFFC);
-    SP = 0xFF;
-    A = 0;
-    X = 0;
-    Y = 0;
-
-    P.Flags.C = 0;
-    P.Flags.Z = 0;
-    P.Flags.I = 0;
-    P.Flags.D = 0;
-    P.Flags.B = 0;
-    P.Flags.V = 0;
-    P.Flags.N = 0;
+    IRQ_pending = false;
+    NMI_pending = false;
+    RESET_pending = false;
+    RESET();
 }
 
 uint32_t CPU::Run(uint32_t instructions_to_execute)
@@ -47,20 +33,33 @@ uint32_t CPU::Run(uint32_t instructions_to_execute)
 
     while (instructions_to_execute > 0)
     {
-        Opcode instruction = static_cast<Opcode>(GetByteFromPC());
         uint8_t instruction_cycles = 0;
 
-        if (opcodesHandlers.find(instruction) == opcodesHandlers.end())
+
+        // First handle any pending external interruption
+        if (IRQ_pending)
+            instruction_cycles += IRQ();
+        else if (NMI_pending)
+            instruction_cycles += NMI();
+        else if (RESET_pending)
+            instruction_cycles += RESET();
+        else // Normal CPU execution
         {
-            ++instruction_cycles;
-            std::cout << "Unk opcode: " << std::hex << (uint16_t)instruction << "\n";
+            Opcode instruction = static_cast<Opcode>(GetByteFromPC());
+            
+            if (opcodesHandlers.find(instruction) == opcodesHandlers.end())
+                instruction_cycles += NOT_IMPLEMENTED(static_cast<uint16_t>(instruction));
+            else
+            {
+                OpcodeHandler op_handler = opcodesHandlers.at(instruction);
+                instruction_cycles += op_handler.base_cycles;
+                instruction_cycles += op_handler.callback(this);
+            }
         }
-        else
-        {
-            OpcodeHandler op_handler = opcodesHandlers.at(instruction);
-            instruction_cycles += op_handler.base_cycles;
-            instruction_cycles += op_handler.callback(this);
-        }
+
+        IRQ_pending = false;
+        NMI_pending = false;
+        RESET_pending = false;
 
         total_cycles += instruction_cycles;
         --instructions_to_execute;
@@ -113,22 +112,22 @@ void CPU::SetWord(uint16_t address, uint16_t data)
 
 void CPU::PushByteToStack(uint8_t data)
 {
-    memory[0x0100 + SP] = data;
+    memory[STACK_VECTOR + SP] = data;
     --SP;
 }
 
 void CPU::PushWordToStack(uint16_t data)
 {
-    memory[0x0100 + SP] = data >> 8;
+    memory[STACK_VECTOR + SP] = data >> 8;
     --SP;
-    memory[0x0100 + SP] = data & 0xFF;
+    memory[STACK_VECTOR + SP] = data & 0xFF;
     --SP;
 }
 
 uint8_t CPU::PullByteFromStack()
 {
     ++SP;
-    uint8_t data = memory[0x0100 + SP];
+    uint8_t data = memory[STACK_VECTOR + SP];
 
     return data;
 }
@@ -136,9 +135,9 @@ uint8_t CPU::PullByteFromStack()
 uint16_t CPU::PullWordFromStack()
 {
     ++SP;
-    uint16_t data = memory[0x0100 + SP];
+    uint16_t data = memory[STACK_VECTOR + SP];
     ++SP;
-    data |= static_cast<uint16_t>(memory[0x0100 + SP]) << 8;
+    data |= static_cast<uint16_t>(memory[STACK_VECTOR + SP]) << 8;
 
     return data;
 }
@@ -288,6 +287,12 @@ uint8_t CPU::ADC(uint8_t a, uint8_t b)
 uint8_t CPU::SBC(uint8_t a, uint8_t b)
 {
     return ADC(a, ~b);
+}
+
+uint8_t CPU::NOT_IMPLEMENTED(uint16_t instruction)
+{
+    std::cout << "NOT_IMPLEMENTED: " << std::hex << instruction << " - At: " << PC - 1 << "\n";
+    return 1;
 }
 
 uint8_t CPU::LDA_IM()
@@ -1852,7 +1857,7 @@ uint8_t CPU::BRK()
 
     PushWordToStack(PC);
     PushByteToStack(P.Pbyte);
-    PC = GetWordFromAddress(0xFFFE);
+    PC = GetWordFromAddress(IRQ_VECTOR);
 
     P.Flags.I = 1;
 
@@ -1873,4 +1878,43 @@ uint8_t CPU::RTI()
     P.Flags.U = 0;
 
     return 0;
+}
+
+uint8_t CPU::RESET()
+{
+    PC = GetWordFromAddress(RESET_VECTOR);
+    SP = 0xFF;
+    A = 0;
+    X = 0;
+    Y = 0;
+
+    P.Pbyte = 0b00000000;
+
+    return 8;
+}
+
+uint8_t CPU::NMI()
+{
+    P.Flags.U = 1;
+
+    PushWordToStack(PC);
+    PushByteToStack(P.Pbyte);
+    PC = GetWordFromAddress(NMI_VECTOR);
+
+    P.Flags.I = 1;
+
+    return 8;
+}
+
+uint8_t CPU::IRQ()
+{
+    P.Flags.U = 1;
+
+    PushWordToStack(PC);
+    PushByteToStack(P.Pbyte);
+    PC = GetWordFromAddress(IRQ_VECTOR);
+
+    P.Flags.I = 1;
+
+    return 8;
 }

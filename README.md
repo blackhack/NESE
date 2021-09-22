@@ -13,4 +13,6 @@ https://www.zophar.net/fileuploads/2/10532krzvs/6502.txt
 
 https://www.youtube.com/watch?v=qJgsuQoy9bc
 
+https://www.pagetable.com/?p=410
+
 and lots of googling

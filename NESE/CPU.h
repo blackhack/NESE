@@ -27,12 +27,17 @@
 #define setBit(var, pos) var |= (0x1 << pos)
 #define clearBit(var, pos) var &= ~(0x1 << pos)
 
+/* NMI/RESET/IRQ/BRK put PC on one of those address */
+constexpr uint16_t NMI_VECTOR = 0xFFFA;
+constexpr uint16_t RESET_VECTOR = 0xFFFC;
+constexpr uint16_t IRQ_VECTOR = 0xFFFE; // Also BRK
+
+constexpr uint16_t STACK_VECTOR = 0x0100;
+
 class CPU
 {
 public:
     CPU(Memory& mem);
-
-    void Reset();
 
     /* REGISTERS */
     uint16_t PC; // ProgramCounter
@@ -90,7 +95,6 @@ public:
     uint8_t GetDataIndirectX(uint8_t* extra_cycles = nullptr, uint16_t* obtained_address = nullptr);
     uint8_t GetDataIndirectY(uint8_t* extra_cycles = nullptr, uint16_t* obtained_address = nullptr);
 
-
     /* HELPER FUNCTIONS */
 
     //Sets P.Flags.N and P.Flags.Z
@@ -99,6 +103,19 @@ public:
 
     uint8_t ADC(uint8_t a, uint8_t b);
     uint8_t SBC(uint8_t a, uint8_t b);
+
+    // For illegal not implemented opcodes, basically a NOP with logging
+    uint8_t NOT_IMPLEMENTED(uint16_t instruction);
+
+    // External "instructions" or hardware interrupts
+private:
+    bool IRQ_pending;
+    bool NMI_pending;
+    bool RESET_pending;
+public:
+    void IRQ_Trigger() { if (P.Flags.I == 0) IRQ_pending = true; }
+    void NMI_Trigger() { NMI_pending = true; }
+    void RESET_Trigger() { RESET_pending = true; }
 
     /* OPCODES HANDLER */
     uint8_t LDA_IM();
@@ -282,6 +299,9 @@ public:
     uint8_t BRK();
     uint8_t NOP();
     uint8_t RTI();
+    uint8_t RESET();
+    uint8_t NMI();
+    uint8_t IRQ();
 
     Memory& memory;
 };
