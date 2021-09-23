@@ -18,10 +18,10 @@
 
 #include <gtest/gtest.h>
 #include "CPU.h"
-#include "Memory.h"
+#include "Bus.h"
 
 TEST(StatusFlagChanges, CLC) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     cpu.P.Flags.C = 1;
@@ -33,7 +33,7 @@ TEST(StatusFlagChanges, CLC) {
 }
 
 TEST(StatusFlagChanges, SEC) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     cpu.P.Flags.C = 0;

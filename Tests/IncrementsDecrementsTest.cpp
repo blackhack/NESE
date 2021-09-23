@@ -18,10 +18,10 @@
 
 #include <gtest/gtest.h>
 #include "CPU.h"
-#include "Memory.h"
+#include "Bus.h"
 
 TEST(IncrementsDecrementsTest, INC_ZP_X) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::INC_ZP_X);
@@ -42,7 +42,7 @@ TEST(IncrementsDecrementsTest, INC_ZP_X) {
 }
 
 TEST(IncrementsDecrementsTest, DEC_ABS_X) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::DEC_ABS_X);
@@ -67,7 +67,7 @@ TEST(IncrementsDecrementsTest, DEC_ABS_X) {
 }
 
 TEST(IncrementsDecrementsTest, INX_DEX) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::INX);
@@ -84,7 +84,7 @@ TEST(IncrementsDecrementsTest, INX_DEX) {
 }
 
 TEST(IncrementsDecrementsTest, INY_DEY) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::INY);

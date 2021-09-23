@@ -18,10 +18,10 @@
 
 #include <gtest/gtest.h>
 #include "CPU.h"
-#include "Memory.h"
+#include "Bus.h"
 
 TEST(SystemFunctions, BRK_RTI) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     cpu.P.Pbyte = 0b11000001;
@@ -44,7 +44,7 @@ TEST(SystemFunctions, BRK_RTI) {
 }
 
 TEST(SystemFunctions, NOP) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::NOP);

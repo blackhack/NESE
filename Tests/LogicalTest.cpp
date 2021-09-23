@@ -18,10 +18,10 @@
 
 #include <gtest/gtest.h>
 #include "CPU.h"
-#include "Memory.h"
+#include "Bus.h"
 
 TEST(LogicalTest, AND_ZP_X) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::AND_ZP_X);
@@ -46,7 +46,7 @@ TEST(LogicalTest, AND_ZP_X) {
 }
 
 TEST(LogicalTest, EOR_ABS_Y) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::EOR_ABS_Y);
@@ -77,7 +77,7 @@ TEST(LogicalTest, EOR_ABS_Y) {
 }
 
 TEST(LogicalTest, ORA_IND_X) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::ORA_IND_X);
@@ -94,7 +94,7 @@ TEST(LogicalTest, ORA_IND_X) {
 }
 
 TEST(LogicalTest, BIT_ABS) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::BIT_ABS);

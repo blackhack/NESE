@@ -16,28 +16,33 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "Memory.h"
+#include "Bus.h"
 #include <algorithm>
 #include <fstream>
 #include <sstream>
 #include <vector>
 
-Memory::Memory()
+Bus::Bus()
 {
-    _data.fill(0);
+    _data.resize(MAX_MEMORY, 0);
 }
 
-const uint8_t Memory::operator[](uint16_t address) const
+Bus::~Bus()
+{
+
+}
+
+const uint8_t Bus::operator[](uint16_t address) const
 {
     return _data.at(address);
 }
 
-uint8_t& Memory::operator[](uint16_t address)
+uint8_t& Bus::operator[](uint16_t address)
 {
     return _data.at(address);
 }
 
-bool Memory::LoadFile(std::string filepath)
+bool Bus::LoadFile(std::string filepath)
 {
     std::ifstream fileStream;
     fileStream.open(filepath, std::ios::binary | std::ios::ate);

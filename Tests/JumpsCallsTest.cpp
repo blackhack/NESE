@@ -18,10 +18,10 @@
 
 #include <gtest/gtest.h>
 #include "CPU.h"
-#include "Memory.h"
+#include "Bus.h"
 
 TEST(JumpsCallsTest, JMP_ABS) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::JMP_ABS);
@@ -34,7 +34,7 @@ TEST(JumpsCallsTest, JMP_ABS) {
 }
 
 TEST(JumpsCallsTest, JMP_IND) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::JMP_IND);
@@ -49,7 +49,7 @@ TEST(JumpsCallsTest, JMP_IND) {
 }
 
 TEST(JumpsCallsTest, JSR_RTS) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::JSR_ABS);

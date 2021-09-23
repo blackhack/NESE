@@ -16,12 +16,27 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#ifndef Memory_h__
+#define Memory_h__
+
+#include <cstdint>
+#include <vector>
 #include <iostream>
-#include "Cartridge.h"
 
-int main()
+constexpr uint32_t MAX_MEMORY = 1024*64;
+
+class Bus
 {
-    Cartridge test("TestRom.nes");
+public:
+    Bus();
+    ~Bus();
 
-    return 0;
-}
+    const uint8_t operator[](uint16_t address) const;
+    uint8_t& operator[](uint16_t address);
+
+    bool LoadFile(std::string filepath);
+private:
+    std::vector<uint8_t> _data;
+};
+
+#endif // Memory_h__

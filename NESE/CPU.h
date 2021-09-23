@@ -21,7 +21,7 @@
 
 #include <cstdint>
 #include "Opcode.h"
-#include "Memory.h"
+#include "Bus.h"
 
 #define checkBit(var, pos) ((var >> pos) & 0x1);
 #define setBit(var, pos) var |= (0x1 << pos)
@@ -37,7 +37,7 @@ constexpr uint16_t STACK_VECTOR = 0x0100;
 class CPU
 {
 public:
-    CPU(Memory& mem);
+    CPU(Bus& mem);
 
     /* REGISTERS */
     uint16_t PC; // ProgramCounter
@@ -303,7 +303,7 @@ public:
     uint8_t NMI();
     uint8_t IRQ();
 
-    Memory& memory;
+    Bus& memory;
 };
 
 #endif // CPU_h__

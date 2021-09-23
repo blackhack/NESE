@@ -18,10 +18,10 @@
 
 #include <gtest/gtest.h>
 #include "CPU.h"
-#include "Memory.h"
+#include "Bus.h"
 
 TEST(RegisterTransferTest, TAX) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::TAX);
@@ -33,7 +33,7 @@ TEST(RegisterTransferTest, TAX) {
 }
 
 TEST(RegisterTransferTest, TAY) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::TAY);
@@ -45,7 +45,7 @@ TEST(RegisterTransferTest, TAY) {
 }
 
 TEST(RegisterTransferTest, TXA) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::TXA);
@@ -57,7 +57,7 @@ TEST(RegisterTransferTest, TXA) {
 }
 
 TEST(RegisterTransferTest, TYA) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::TYA);

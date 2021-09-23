@@ -19,7 +19,7 @@
 #include "CPU.h"
 #include <iostream>
 
-CPU::CPU(Memory& mem) : memory(mem)
+CPU::CPU(Bus& mem) : memory(mem)
 {
     IRQ_pending = false;
     NMI_pending = false;
@@ -34,7 +34,6 @@ uint32_t CPU::Run(uint32_t instructions_to_execute)
     while (instructions_to_execute > 0)
     {
         uint8_t instruction_cycles = 0;
-
 
         // First handle any pending external interruption
         if (IRQ_pending)

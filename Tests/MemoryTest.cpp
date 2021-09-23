@@ -18,10 +18,10 @@
 
 #include <gtest/gtest.h>
 #include "CPU.h"
-#include "Memory.h"
+#include "Bus.h"
 
 TEST(MemoryTest, BasicAssignment) {
-    Memory mem;
+    Bus mem;
     for (int i = 0; i < MAX_MEMORY; ++i)
         EXPECT_EQ(mem[i], 0);
 

@@ -18,10 +18,10 @@
 
 #include <gtest/gtest.h>
 #include "CPU.h"
-#include "Memory.h"
+#include "Bus.h"
 
 TEST(StackOperationsTest, TSX) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::TSX);
@@ -33,7 +33,7 @@ TEST(StackOperationsTest, TSX) {
 }
 
 TEST(StackOperationsTest, TXS) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::TXS);
@@ -45,7 +45,7 @@ TEST(StackOperationsTest, TXS) {
 }
 
 TEST(StackOperationsTest, PHA_PLA) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::PHA);
@@ -64,7 +64,7 @@ TEST(StackOperationsTest, PHA_PLA) {
 }
 
 TEST(StackOperationsTest, PHP_PLP) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::PHP);

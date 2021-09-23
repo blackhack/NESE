@@ -16,26 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef Memory_h__
-#define Memory_h__
+#ifndef PPU_h__
+#define PPU_h__
 
-#include <cstdint>
-#include <array>
-#include <iostream>
 
-constexpr uint32_t MAX_MEMORY = 1024*64;
-
-class Memory
-{
-public:
-    Memory();
-
-    const uint8_t operator[](uint16_t address) const;
-    uint8_t& operator[](uint16_t address);
-
-    bool LoadFile(std::string filepath);
-private:
-    std::array<uint8_t, MAX_MEMORY> _data;
-};
-
-#endif // Memory_h__
+#endif // PPU_h__

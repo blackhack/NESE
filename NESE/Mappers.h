@@ -16,12 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <iostream>
-#include "Cartridge.h"
+#ifndef Mappers_h__
+#define Mappers_h__
 
-int main()
-{
-    Cartridge test("TestRom.nes");
 
-    return 0;
-}
+#endif // Mappers_h__

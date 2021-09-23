@@ -18,10 +18,10 @@
 
 #include <gtest/gtest.h>
 #include "CPU.h"
-#include "Memory.h"
+#include "Bus.h"
 
 TEST(BranchesTest, BCC_REL) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     cpu.P.Flags.C = 0;
@@ -34,7 +34,7 @@ TEST(BranchesTest, BCC_REL) {
 }
 
 TEST(BranchesTest, BVS_REL) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     cpu.P.Flags.V = 1;
@@ -48,7 +48,7 @@ TEST(BranchesTest, BVS_REL) {
 }
 
 TEST(BranchesTest, BNE_REL) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     cpu.P.Flags.N = 0;

@@ -18,10 +18,10 @@
 
 #include <gtest/gtest.h>
 #include "CPU.h"
-#include "Memory.h"
+#include "Bus.h"
 
 TEST(LoadStoreTest, LDA_FlagsTest) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::LDA_IM);
@@ -44,7 +44,7 @@ TEST(LoadStoreTest, LDA_FlagsTest) {
 }
 
 TEST(LoadStoreTest, LDA_IM) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::LDA_IM);
@@ -57,7 +57,7 @@ TEST(LoadStoreTest, LDA_IM) {
 }
 
 TEST(LoadStoreTest, LDA_ZP) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::LDA_ZP);
@@ -70,7 +70,7 @@ TEST(LoadStoreTest, LDA_ZP) {
 }
 
 TEST(LoadStoreTest, LDA_ZP_X) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::LDA_ZP_X);
@@ -93,7 +93,7 @@ TEST(LoadStoreTest, LDA_ZP_X) {
 }
 
 TEST(LoadStoreTest, LDA_ABS) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::LDA_ABS);
@@ -107,7 +107,7 @@ TEST(LoadStoreTest, LDA_ABS) {
 }
 
 TEST(LoadStoreTest, LDA_ABS_X) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::LDA_ABS_X);
@@ -136,7 +136,7 @@ TEST(LoadStoreTest, LDA_ABS_X) {
 }
 
 TEST(LoadStoreTest, LDA_ABS_Y) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::LDA_ABS_Y);
@@ -165,7 +165,7 @@ TEST(LoadStoreTest, LDA_ABS_Y) {
 }
 
 TEST(LoadStoreTest, LDA_IND_X) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::LDA_IND_X);
@@ -181,7 +181,7 @@ TEST(LoadStoreTest, LDA_IND_X) {
 }
 
 TEST(LoadStoreTest, LDA_IND_Y) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::LDA_IND_Y);
@@ -208,7 +208,7 @@ TEST(LoadStoreTest, LDA_IND_Y) {
 }
 
 TEST(LoadStoreTest, LDX_ZP_Y) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::LDX_ZP_Y);
@@ -231,7 +231,7 @@ TEST(LoadStoreTest, LDX_ZP_Y) {
 }
 
 TEST(LoadStoreTest, LDY_ABS_X) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::LDY_ABS_X);
@@ -260,7 +260,7 @@ TEST(LoadStoreTest, LDY_ABS_X) {
 }
 
 TEST(LoadStoreTest, STA_IND_Y) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::STA_IND_Y);
@@ -276,7 +276,7 @@ TEST(LoadStoreTest, STA_IND_Y) {
 }
 
 TEST(LoadStoreTest, STX_ZP) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::STX_ZP);
@@ -289,7 +289,7 @@ TEST(LoadStoreTest, STX_ZP) {
 }
 
 TEST(LoadStoreTest, STY_ABS) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::STY_ABS);

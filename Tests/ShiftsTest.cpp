@@ -18,10 +18,10 @@
 
 #include <gtest/gtest.h>
 #include "CPU.h"
-#include "Memory.h"
+#include "Bus.h"
 
 TEST(ShiftsTest, ASL_ACC) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::ASL_ACC);
@@ -35,7 +35,7 @@ TEST(ShiftsTest, ASL_ACC) {
 }
 
 TEST(ShiftsTest, LSR_ZP) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::LSR_ZP);
@@ -50,7 +50,7 @@ TEST(ShiftsTest, LSR_ZP) {
 }
 
 TEST(ShiftsTest, ROL_ABS) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::ROL_ABS);
@@ -66,7 +66,7 @@ TEST(ShiftsTest, ROL_ABS) {
 }
 
 TEST(ShiftsTest, ROR_ABS) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     mem[0] = static_cast<uint8_t>(Opcode::ROR_ABS);

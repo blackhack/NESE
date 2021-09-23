@@ -18,11 +18,11 @@
 
 #include <gtest/gtest.h>
 #include "CPU.h"
-#include "Memory.h"
+#include "Bus.h"
 
 
 TEST(ArithmeticTest, ADC_ABS) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     cpu.P.Flags.C = 0;
@@ -46,7 +46,7 @@ TEST(ArithmeticTest, ADC_ABS) {
 }
 
 TEST(ArithmeticTest, SBC_ABS) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     cpu.P.Flags.C = 1;
@@ -70,7 +70,7 @@ TEST(ArithmeticTest, SBC_ABS) {
 }
 
 TEST(ArithmeticTest, CMP_IM) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     cpu.P.Flags.C = 0;
@@ -90,7 +90,7 @@ TEST(ArithmeticTest, CMP_IM) {
 }
 
 TEST(ArithmeticTest, CPX_ZP) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     cpu.P.Flags.C = 1;
@@ -111,7 +111,7 @@ TEST(ArithmeticTest, CPX_ZP) {
 }
 
 TEST(ArithmeticTest, CPY_ZP) {
-    Memory mem;
+    Bus mem;
     CPU cpu(mem);
 
     cpu.P.Flags.C = 0;
