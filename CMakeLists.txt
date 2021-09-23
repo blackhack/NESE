@@ -20,7 +20,12 @@ project(NESE)
 # GoogleTest requires at least C++11
 set(CMAKE_CXX_STANDARD 11)
 
-add_subdirectory(NESE)
-add_subdirectory(Tests)
+option(UnitTests "Enable CPU unit testing project" 0)
 
-set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT UnitTesting)
+add_subdirectory(NESE)
+
+if(UnitTests)
+	add_subdirectory(Tests)
+endif()
+
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT NESE)
